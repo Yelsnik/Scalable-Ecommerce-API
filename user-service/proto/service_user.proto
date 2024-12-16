@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/api/annotations.proto";
+import "rpc_create_user.proto";
+import "rpc_login_user.proto";
+import "rpc_forgot_password.proto";
+import "rpc_reset_password.proto";
+
+option go_package = "user-service/pb";
+
+service UserService {
+    rpc CreateUser (CreateUserRequest) returns (CreateUserResponse){
+        option (google.api.http) = {
+            post: "/v1/sign-up"
+            body: "*"
+        };
+    }
+    rpc LoginUser (LoginUserRequest) returns (LoginUserResponse){
+        option (google.api.http) = {
+            post: "/v1/sign-in"
+            body: "*"
+        };
+    }
+    rpc ForgotPassword (ForgotPasswordRequest) returns (ForgotPasswordResponse){
+        option (google.api.http) = {
+            post: "/v1/forgot-password"
+            body: "*"
+        };
+    }
+    rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordResponse){
+        option (google.api.http) = {
+            post: "/v1/reset-password"
+            body: "*"
+        };
+    }
+}
