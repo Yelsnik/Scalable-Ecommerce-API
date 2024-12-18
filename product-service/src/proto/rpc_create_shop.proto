@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pb;
+
+import "shop.proto";
+
+message CreateShopRequest{
+    string name = 1;
+    string description = 2;
+    bytes image = 3;
+    string imageName = 4;
+    string shopOwner = 5;
+}
+
+message CreateShopResponse{
+    Shop shop = 1;
+}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package pb;
+
+import "rpc_create_shop.proto";
+
+service ShopService {
+    rpc CreateShop(CreateShopRequest) returns (CreateShopResponse){}
+}
