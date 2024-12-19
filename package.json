@@ -1,0 +1,20 @@
+{
+  "name": "e-commerce",
+  "version": "1.0.0",
+  "description": "This platform handles various aspects of an online store, such as product catalog management, user authentication, shopping cart, payment processing, and order management. Each of these features will be implemented as separate microservices, allowing for independent development, deployment, and scaling.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yelsnik/Scalable-Ecommerce-API.git"
+  },
+  "keywords": [],
+  "author": "Kingsley Okure",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Yelsnik/Scalable-Ecommerce-API/issues"
+  },
+  "homepage": "https://github.com/Yelsnik/Scalable-Ecommerce-API#readme"
+}

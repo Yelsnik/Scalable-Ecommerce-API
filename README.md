@@ -9,7 +9,8 @@ This platform handles various aspects of an online store, such as product catalo
 
 ### Technologies Used
 - Go
+- NestJs for building the API gateway and the product-service
 - PostgresSQL as database
 - Docker for containerization
-- GRPC for building the services and as API gateway
+- GRPC for building the services 
 - SQLC for generating Go code from sql queries
