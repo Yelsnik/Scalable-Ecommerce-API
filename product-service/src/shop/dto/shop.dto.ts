@@ -2,13 +2,13 @@ import { IsString } from "class-validator"
 
 export class ShopDto {
   @IsString()
-  private readonly name: string
+    name: string
 
   @IsString()
-  private readonly description: string
+    description: string
 
   @IsString()
-  private readonly shopOwner: string
+    shopOwner: string
 
-  private readonly updatedAt?: Date
+    updatedAt?: Date
 }

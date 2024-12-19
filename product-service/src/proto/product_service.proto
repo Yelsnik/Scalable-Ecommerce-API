@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package pb;
+
+import "rpc_create_product.proto";
+
+
+service ProductService {
+    rpc AddProduct(CreateProductRequest) returns (CreateProductResponse) {}
+}

@@ -1,0 +1,12 @@
+version: "3.9"
+services: 
+  
+  api: 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment: 
+      - DATABASE=mongodb+srv://kingsley:mahanta@cluster0.30vt0jd.mongodb.net/e_commerce_product
+  

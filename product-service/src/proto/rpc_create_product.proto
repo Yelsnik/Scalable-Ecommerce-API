@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/any.proto";
+import "product.proto";
+import "file.proto";
+
+message CreateProductRequest {
+    string category = 1;
+    string product_name = 2;
+    string description = 3;
+    string brand = 4;
+    File image = 5;
+    int64 count_in_stock = 6;
+    float price = 7;
+    string currency = 8;
+    google.protobuf.Any shop = 9;
+    int64 rating = 10;
+    bool is_featured = 11;
+}
+
+message CreateProductResponse {
+    string message = 1;
+    Product product = 2;
+}

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+
+message Product {
+    google.protobuf.Any id = 1;
+    string category = 2;
+    string product_name = 3;
+    string description = 4;
+    string brand = 5;
+    string image = 6;
+    int64 count_in_stock = 7;
+    float price = 8;
+    string currency = 9;
+    google.protobuf.Any shop = 10;
+    int64 rating = 11;
+    bool is_featured = 12;
+    google.protobuf.Timestamp updated_at = 13;
+    google.protobuf.Timestamp created_at = 14;
+}

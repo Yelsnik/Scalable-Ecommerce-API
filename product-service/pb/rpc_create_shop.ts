@@ -6,6 +6,7 @@
 
 /* eslint-disable */
 import { BinaryReader, BinaryWriter } from "@bufbuild/protobuf/wire";
+import { File } from "./file";
 import { Shop } from "./shop";
 
 export const protobufPackage = "pb";
@@ -13,9 +14,8 @@ export const protobufPackage = "pb";
 export interface CreateShopRequest {
   name: string;
   description: string;
-  image: Uint8Array;
-  imageName: string;
   shopOwner: string;
+  file: File | undefined;
 }
 
 export interface CreateShopResponse {
@@ -23,7 +23,7 @@ export interface CreateShopResponse {
 }
 
 function createBaseCreateShopRequest(): CreateShopRequest {
-  return { name: "", description: "", image: new Uint8Array(0), imageName: "", shopOwner: "" };
+  return { name: "", description: "", shopOwner: "", file: undefined };
 }
 
 export const CreateShopRequest: MessageFns<CreateShopRequest> = {
@@ -34,14 +34,11 @@ export const CreateShopRequest: MessageFns<CreateShopRequest> = {
     if (message.description !== "") {
       writer.uint32(18).string(message.description);
     }
-    if (message.image.length !== 0) {
-      writer.uint32(26).bytes(message.image);
-    }
-    if (message.imageName !== "") {
-      writer.uint32(34).string(message.imageName);
-    }
     if (message.shopOwner !== "") {
-      writer.uint32(42).string(message.shopOwner);
+      writer.uint32(26).string(message.shopOwner);
+    }
+    if (message.file !== undefined) {
+      File.encode(message.file, writer.uint32(34).fork()).join();
     }
     return writer;
   },
@@ -74,7 +71,7 @@ export const CreateShopRequest: MessageFns<CreateShopRequest> = {
             break;
           }
 
-          message.image = reader.bytes();
+          message.shopOwner = reader.string();
           continue;
         }
         case 4: {
@@ -82,15 +79,7 @@ export const CreateShopRequest: MessageFns<CreateShopRequest> = {
             break;
           }
 
-          message.imageName = reader.string();
-          continue;
-        }
-        case 5: {
-          if (tag !== 42) {
-            break;
-          }
-
-          message.shopOwner = reader.string();
+          message.file = File.decode(reader, reader.uint32());
           continue;
         }
       }
@@ -106,9 +95,8 @@ export const CreateShopRequest: MessageFns<CreateShopRequest> = {
     return {
       name: isSet(object.name) ? globalThis.String(object.name) : "",
       description: isSet(object.description) ? globalThis.String(object.description) : "",
-      image: isSet(object.image) ? bytesFromBase64(object.image) : new Uint8Array(0),
-      imageName: isSet(object.imageName) ? globalThis.String(object.imageName) : "",
       shopOwner: isSet(object.shopOwner) ? globalThis.String(object.shopOwner) : "",
+      file: isSet(object.file) ? File.fromJSON(object.file) : undefined,
     };
   },
 
@@ -120,14 +108,11 @@ export const CreateShopRequest: MessageFns<CreateShopRequest> = {
     if (message.description !== "") {
       obj.description = message.description;
     }
-    if (message.image.length !== 0) {
-      obj.image = base64FromBytes(message.image);
-    }
-    if (message.imageName !== "") {
-      obj.imageName = message.imageName;
-    }
     if (message.shopOwner !== "") {
       obj.shopOwner = message.shopOwner;
+    }
+    if (message.file !== undefined) {
+      obj.file = File.toJSON(message.file);
     }
     return obj;
   },
@@ -139,9 +124,8 @@ export const CreateShopRequest: MessageFns<CreateShopRequest> = {
     const message = createBaseCreateShopRequest();
     message.name = object.name ?? "";
     message.description = object.description ?? "";
-    message.image = object.image ?? new Uint8Array(0);
-    message.imageName = object.imageName ?? "";
     message.shopOwner = object.shopOwner ?? "";
+    message.file = (object.file !== undefined && object.file !== null) ? File.fromPartial(object.file) : undefined;
     return message;
   },
 };
@@ -203,31 +187,6 @@ export const CreateShopResponse: MessageFns<CreateShopResponse> = {
     return message;
   },
 };
-
-function bytesFromBase64(b64: string): Uint8Array {
-  if ((globalThis as any).Buffer) {
-    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
-  } else {
-    const bin = globalThis.atob(b64);
-    const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; ++i) {
-      arr[i] = bin.charCodeAt(i);
-    }
-    return arr;
-  }
-}
-
-function base64FromBytes(arr: Uint8Array): string {
-  if ((globalThis as any).Buffer) {
-    return globalThis.Buffer.from(arr).toString("base64");
-  } else {
-    const bin: string[] = [];
-    arr.forEach((byte) => {
-      bin.push(globalThis.String.fromCharCode(byte));
-    });
-    return globalThis.btoa(bin.join(""));
-  }
-}
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
