@@ -5,6 +5,7 @@ import { Shop, ShopSchema } from './shop.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { GridFsModule } from 'src/grid-fs/grid-fs.module';
+import { GridFsService } from 'src/grid-fs/grid-fs.service';
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { GridFsModule } from 'src/grid-fs/grid-fs.module';
     GridFsModule
   ],
   controllers: [ShopController],
-  providers: [ShopService]
+  providers: [ShopService, GridFsService]
 })
 export class ShopModule {}

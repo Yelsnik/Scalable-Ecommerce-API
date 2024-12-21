@@ -1,7 +1,6 @@
 import { IsNumber, IsString } from "class-validator"
 
 export class GridFsDto {
-  id: any
     
   buffer: Buffer
 
@@ -9,25 +8,14 @@ export class GridFsDto {
   originalname: string
 
   @IsString()
-  filename: string
+  fieldname: string
 
   @IsNumber()
   size: number
-
-  @IsNumber()
-  chunksize: number
 
   @IsString()
   mimetype: string
 
   @IsString()
-  bucketname: string
-
-  @IsString()
-  md5: string
-
-  @IsString()
-  contentType: string
-
-  metadata: any
+  encoding: string
 }

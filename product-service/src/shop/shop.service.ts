@@ -1,48 +1,95 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Shop } from './shop.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { ShopService as SH } from 'pb/shop_service';
-import { CreateShopRequest, CreateShopResponse } from 'pb/rpc_create_shop';
+import { Model, Types } from 'mongoose';
+import { CreateShopRequest, Shop as S, GetShopByIdRequest, GetShopsByOwnerRequest, GetShopsByOwnerResponse, ShopResponse } from 'pb/shop_service';
 import { GridFsService } from 'src/grid-fs/grid-fs.service';
-import { GridFsDto } from 'src/grid-fs/dto/grid-fs.dto';
+
 
 
 @Injectable()
-export class ShopService implements SH {
+export class ShopService {
     constructor(@InjectModel(Shop.name) private shopModel: Model<Shop>, private gridFs: GridFsService){}
+  
+    // create shop
+  async  createShop(request: CreateShopRequest): Promise<ShopResponse> {
+    const buffer = Buffer.from(request.image.buffer);
 
-   async  CreateShop(request: CreateShopRequest): Promise<CreateShopResponse> {
-       try{
-        const buffer = Buffer.from(request.file.buffer);
+    const file = this.gridFs.loadImage(request.image, buffer)
 
-        const file = this.gridFs.loadImage(request.file, buffer)
- 
-       const result = await this.gridFs.uploadFile(file, "shop-image")
- 
-        const shop = await this.shopModel.create({
-         name: request.name,
-         description: request.description,
-         imageID: result.id,
-         image: request.file.filename,
-         shopOwner: request.shopOwner
-        })
- 
-        const response = {
-         id: shop.id,
-         name: shop.name,
-         description: shop.description,
-         imageName: shop.image,
-         shopOwner: shop.shopOwner
+
+     const id = await this.gridFs.uploadFile(file, "shop-image")
+     console.log(id)
+
+
+      const shop = await this.shopModel.create({
+       name: request.name,
+       description: request.description,
+       imageID: id,
+       image: request.image.originalname,
+       shopOwner: request.shopOwner
+      })
+
+      const res: ShopResponse = {
+        shop: {
+          name: shop.name,
+          description: shop.description,
+          shopOwner: shop.shopOwner,
+          id: shop.id,
+          imageName: shop.image
         }
+      }
 
-       return {
-         shop: response
-       }
+     return res
+  }
 
-       }catch(err){
-        throw new InternalServerErrorException("error creating shop", err)
-       }
-         
-    } 
+  // get shop by id
+  async getShopById(request: GetShopByIdRequest): Promise<ShopResponse> {
+   // const id = new Types.ObjectId(request.id)
+
+    const shop = await this.shopModel.findById(request.id).exec()
+
+    const response: S = {
+      name: shop.name,
+        description: shop.description,
+        shopOwner: shop.shopOwner,
+        id: shop.id,
+        imageName: shop.image
+    }
+
+    const res: ShopResponse = {
+      shop: response
+    }
+
+    return res
+
+    
+  }
+
+  // get shop by owner id
+  async getShopsByOwner (request: GetShopsByOwnerRequest): Promise<GetShopsByOwnerResponse>{
+
+    const db = await this.shopModel.find({shopOwner: request.id}).exec()
+
+    const res: S[] = db.map((shop)=>{
+      let response: S = {
+        id: shop.id,
+        name: shop.name,
+        description: shop.description,
+        imageName: shop.image,
+        shopOwner: shop.shopOwner
+      } 
+
+      return response
+    })
+    
+
+    const result: GetShopsByOwnerResponse = {
+      shops: res
+    }
+
+    return result
+    
+  }
+   
 }

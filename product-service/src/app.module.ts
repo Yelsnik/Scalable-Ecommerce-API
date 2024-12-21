@@ -17,6 +17,6 @@ import { GridFsModule } from './grid-fs/grid-fs.module';
     GridFsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, GridFsService],
+  providers: [AppService],
 })
 export class AppModule {}

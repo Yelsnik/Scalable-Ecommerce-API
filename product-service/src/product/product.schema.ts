@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument, ObjectId } from 'mongoose';
+import mongoose, { HydratedDocument, ObjectId, Types } from 'mongoose';
 import { Shop } from 'src/shop/shop.schema';
 
 
@@ -25,8 +25,8 @@ export class Product {
     @Prop()
     brand: string
 
-    @Prop()
-    imageID: ObjectId
+    @Prop({type: Types.ObjectId})
+    imageID: Types.ObjectId
 
     @Prop()
     image: string

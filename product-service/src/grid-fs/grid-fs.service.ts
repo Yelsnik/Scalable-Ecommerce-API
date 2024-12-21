@@ -1,27 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { MongoClient, GridFSBucket, GridFSBucketWriteStream } from 'mongodb';
 import { Readable } from 'stream';
 import { GridFsDto } from './dto/grid-fs.dto';
 import { File } from 'pb/file';
 
 @Injectable()
-export class GridFsService {
-    private bucket: GridFSBucket
+export class GridFsService implements OnModuleInit {
+    //private bucket: GridFSBucket
     private db: any;
 
-    constructor(){
-        const client = new MongoClient(process.env.DATABASE);
-        client.connect().then(() => {
-          this.db = client.db(process.env.DB_NAME); 
-        });
+
+    private async initDb() {
+      const client = new MongoClient(process.env.DATABASE);
+      await client.connect();
+      this.db = client.db(process.env.DB_NAME);
+      console.log('Database connected');
     }
+
+   async onModuleInit() {
+    await this.initDb()
+  }
 
      /**
    * Dynamically creates and returns a GridFSBucket instance with the specified bucket name.
    * @param bucketName - The name of the bucket.
    * @returns GridFSBucket instance.
    */
-    getBucket(bucketName: string): GridFSBucket {
+   private getBucket(bucketName: string): GridFSBucket {
       if (!this.db) {
         throw new Error('Database connection not initialized');
       }
@@ -35,12 +40,12 @@ export class GridFsService {
    * @returns Promise with the upload result.
    */
 
-    async uploadFile(file: GridFsDto, bucketName: string): Promise<GridFSBucketWriteStream> {
+    async uploadFile(file: GridFsDto, bucketName: string): Promise<string> {
         const stream = Readable.from(file.buffer);
         const bucket = this.getBucket(bucketName);
 
         return new Promise((resolve, reject) => {
-            const uploadStream = this.bucket.openUploadStream(file.originalname, {
+            const uploadStream = bucket.openUploadStream(file.originalname, {
               metadata: {
                 mimetype: file.mimetype,
                 size: file.size,
@@ -48,23 +53,18 @@ export class GridFsService {
             });            
             stream.pipe(uploadStream)
               .on('error', (error) => reject(error))
-              .on('finish', (result: GridFSBucketWriteStream) => resolve(result));
+              .on('finish', () => resolve(uploadStream.id.toString()));
           });
     }
 
-    loadImage(image: File, buffer: Buffer<Uint8Array<ArrayBufferLike>>){
+    loadImage(image: File, buffer: Buffer){
       const file: GridFsDto = {
-        id: image.id,
         buffer: buffer,
         originalname: image.originalname,
-        filename: image.filename,
+        fieldname: image.fieldname,
         size: image.size,
-        chunksize: image.chunksize,
         mimetype: image.mimetype,
-        bucketname: image.bucketname,
-        md5: image.md5,
-        contentType: image.contentType,
-        metadata: image.metadata
+        encoding: image.encoding
        } 
 
        return file
