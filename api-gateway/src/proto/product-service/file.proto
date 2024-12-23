@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package product;
+
+message File {
+    bytes buffer = 1;
+    string originalname = 2;
+    string fieldname = 3;
+    int64 size = 4;
+    string mimetype = 5;
+    string encoding = 6;
+}
