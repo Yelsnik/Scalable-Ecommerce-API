@@ -11,9 +11,9 @@ import { GridFsService } from 'src/grid-fs/grid-fs.service';
   imports: [
     MongooseModule.forFeature([{ name: Shop.name, schema: ShopSchema }]),
     ConfigModule.forRoot({ envFilePath: 'app.env', isGlobal: true }),
-    GridFsModule
+    GridFsModule,
   ],
   controllers: [ShopController],
-  providers: [ShopService, GridFsService]
+  providers: [ShopService, GridFsService],
 })
 export class ShopModule {}

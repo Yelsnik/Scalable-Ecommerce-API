@@ -31,7 +31,6 @@ message UpdateShopRequest {
     string id = 1;
     optional string name = 2;
     optional string description = 3;
-    optional File image = 4;
 }
 
 message DeleteShopRequest {

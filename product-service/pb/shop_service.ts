@@ -19,7 +19,7 @@ export interface CreateShopRequest {
 }
 
 export interface ShopResponse {
-  shop: Shop;
+  shop: Shop | undefined;
 }
 
 export interface GetShopByIdRequest {
@@ -38,7 +38,6 @@ export interface UpdateShopRequest {
   id: string;
   name?: string | undefined;
   description?: string | undefined;
-  image?: File | undefined;
 }
 
 export interface DeleteShopRequest {

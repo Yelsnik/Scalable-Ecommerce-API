@@ -7,6 +7,9 @@ import { ConfigModule } from '@nestjs/config';
 import { ShopModule } from './shop/shop.module';
 import { GridFsService } from './grid-fs/grid-fs.service';
 import { GridFsModule } from './grid-fs/grid-fs.module';
+import { APP_FILTER } from "@nestjs/core";
+import { GrpcServerExceptionFilter } from 'nestjs-grpc-exceptions';
+import { MongoExceptionFilter } from './helpers/mongo-exception.filter';
 
 @Module({
   imports: [
@@ -17,6 +20,16 @@ import { GridFsModule } from './grid-fs/grid-fs.module';
     GridFsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: GrpcServerExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: MongoExceptionFilter,
+    },
+  ],
 })
 export class AppModule {}

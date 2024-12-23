@@ -17,7 +17,7 @@ message Product {
     int64 count_in_stock = 7;
     float price = 8;
     string currency = 9;
-    google.protobuf.Any shop = 10;
+    string shop = 10;
     int64 rating = 11;
     bool is_featured = 12;
     google.protobuf.Timestamp updated_at = 13;
@@ -33,7 +33,7 @@ message CreateProductRequest {
     int64 count_in_stock = 6;
     float price = 7;
     string currency = 8;
-    google.protobuf.Any shop = 9;
+    string shop = 9;
     int64 rating = 10;
     bool is_featured = 11;
 }

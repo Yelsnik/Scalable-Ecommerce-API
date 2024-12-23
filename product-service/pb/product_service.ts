@@ -23,7 +23,7 @@ export interface Product {
   countInStock: number;
   price: number;
   currency: string;
-  shop: Any | undefined;
+  shop: string;
   rating: number;
   isFeatured: boolean;
   updatedAt: Timestamp | undefined;
@@ -39,7 +39,7 @@ export interface CreateProductRequest {
   countInStock: number;
   price: number;
   currency: string;
-  shop: Any | undefined;
+  shop: string;
   rating: number;
   isFeatured: boolean;
 }
