@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package cart;
+
+option go_package = "cart-service/cart";
+
+message Cart {
+    string id = 1;
+    string user_id = 2;
+    float total_price = 3;
+}

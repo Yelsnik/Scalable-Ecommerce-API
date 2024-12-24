@@ -5,7 +5,7 @@ createdb:
 	docker exec -it postgres17 createdb --username=root --owner=root e_commerce_cart
 
 dropdb: 
-	docker exec -it postgres17 dropdb simple_bank
+	docker exec -it postgres17 dropdb e_commerce_cart
 
 migrateup:
 	migrate -path db/migration -database "postgresql://root:mahanta@localhost:5432/e_commerce_cart?sslmode=disable" -verbose up
@@ -28,8 +28,13 @@ new_migration:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/Yelsnik/simplebank/db/sqlc Store
 
+proto:
+	rm -f cart/*.go
+	protoc --proto_path=proto --go_out=cart --go_opt=paths=source_relative \
+    --go-grpc_out=cart --go-grpc_opt=paths=source_relative \
+    proto/*.proto
 
 evans:
 	evans --host localhost --port 9090 -r
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server new_migration mock proto
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test server new_migration mock proto evans

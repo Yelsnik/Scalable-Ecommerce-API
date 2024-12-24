@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS cartItems;
+DROP TABLE IF EXISTS carts;
