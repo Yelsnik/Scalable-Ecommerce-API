@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseFilters } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { ProductService } from './product.service';
 import {
@@ -13,8 +13,13 @@ import {
   UpdateProductRequest,
 } from 'pb/product_service';
 import { Observable } from 'rxjs';
+import {
+  AllExceptionFilter,
+  RpcExceptionFilters,
+} from 'src/helpers/all-exception.filter';
 
 @Controller('product')
+@UseFilters(AllExceptionFilter, RpcExceptionFilters)
 export class ProductController implements ProductServiceController {
   constructor(private readonly productService: ProductService) {}
 
@@ -39,20 +44,20 @@ export class ProductController implements ProductServiceController {
     | Promise<GetProductsByShopResponse>
     | Observable<GetProductsByShopResponse>
     | GetProductsByShopResponse {
-    throw new Error('Method not implemented.');
+    return this.productService.GetProductsByShop(request);
   }
 
   @GrpcMethod('ProductService', 'UpdateProduct')
   updateProduct(
     request: UpdateProductRequest,
   ): Promise<ProductResponse> | Observable<ProductResponse> | ProductResponse {
-    throw new Error('Method not implemented.');
+    return this.productService.UpdateProduct(request);
   }
 
   @GrpcMethod('ProductService', 'DeleteProduct')
   deleteProduct(
     request: DeleteProductRequest,
   ): Promise<EmptyRes> | Observable<EmptyRes> | EmptyRes {
-    throw new Error('Method not implemented.');
+    return this.productService.DeleteProduct(request);
   }
 }

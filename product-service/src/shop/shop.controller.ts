@@ -13,10 +13,10 @@ import {
   UpdateShopRequest,
 } from 'pb/shop_service';
 import { Observable } from 'rxjs';
-import { MongoExceptionFilter } from 'src/helpers/mongo-exception.filter';
+import { AllExceptionFilter, RpcExceptionFilters } from 'src/helpers/all-exception.filter';
 
 @Controller('shop')
-@UseFilters(new MongoExceptionFilter())
+@UseFilters(AllExceptionFilter, RpcExceptionFilters)
 export class ShopController implements ShopServiceController {
   constructor(private readonly shopService: ShopService) {}
 

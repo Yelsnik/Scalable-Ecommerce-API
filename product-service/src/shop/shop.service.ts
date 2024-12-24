@@ -1,12 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Shop } from './shop.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import {
   CreateShopRequest,
   Shop as S,
@@ -19,12 +14,8 @@ import {
   Empty,
 } from 'pb/shop_service';
 import { GridFsService } from 'src/grid-fs/grid-fs.service';
-import { error } from 'console';
-import { RpcException } from '@nestjs/microservices';
 import {
   GrpcAbortedException,
-  GrpcInternalException,
-  GrpcInvalidArgumentException,
   GrpcNotFoundException,
 } from 'nestjs-grpc-exceptions';
 

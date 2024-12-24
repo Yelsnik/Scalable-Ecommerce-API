@@ -61,6 +61,7 @@ export interface GetProductsByShopResponse {
 }
 
 export interface UpdateProductRequest {
+  id: string;
   category?: string | undefined;
   productName?: string | undefined;
   description?: string | undefined;
@@ -69,7 +70,6 @@ export interface UpdateProductRequest {
   countInStock?: number | undefined;
   price?: number | undefined;
   currency?: string | undefined;
-  shopId: Any | undefined;
   rating?: number | undefined;
   isFeatured?: boolean | undefined;
 }

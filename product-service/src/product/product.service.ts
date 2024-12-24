@@ -1,9 +1,7 @@
 import {
-  BadRequestException,
   Injectable,
-  InternalServerErrorException,
 } from '@nestjs/common';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { GridFsService } from 'src/grid-fs/grid-fs.service';
 import { Product } from './product.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -12,9 +10,15 @@ import {
   ProductResponse,
   Product as P,
   GetProductByIdRequest,
+  GetProductsByShopRequest,
+  GetProductsByShopResponse,
+  UpdateProductRequest,
+  DeleteProductRequest,
+  EmptyRes,
 } from 'pb/product_service';
 import { Shop } from 'src/shop/shop.schema';
 import { Time } from 'src/interface/interface';
+import { GrpcNotFoundException } from 'nestjs-grpc-exceptions';
 
 @Injectable()
 export class ProductService {
@@ -68,19 +72,20 @@ export class ProductService {
     };
   }
 
+  // get product by id
   async GetProductByID(
     request: GetProductByIdRequest,
   ): Promise<ProductResponse> {
     const product = await this.productModel.findById(request.id).exec();
 
     if (!product) {
-      throw new InternalServerErrorException('product does not exist');
+      throw new GrpcNotFoundException('product does not exist');
     }
 
     const shop = await this.shopModel.findOne(product.shop).exec();
 
     if (!shop) {
-      throw new InternalServerErrorException('shop does not exist');
+      throw new GrpcNotFoundException('shop does not exist');
     }
 
     const id = shop._id.toString();
@@ -105,5 +110,96 @@ export class ProductService {
     return {
       product: res,
     };
+  }
+
+  // get product by shop
+  async GetProductsByShop(
+    request: GetProductsByShopRequest,
+  ): Promise<GetProductsByShopResponse> {
+    const products = await this.productModel.find({ shop: request.id }).exec();
+
+    if (!products) {
+      throw new GrpcNotFoundException('Products not found');
+    }
+
+    const res: P[] = products.map((product) => {
+      const res: P = {
+        id: product.id,
+        category: product.category,
+        productName: product.productName,
+        description: product.description,
+        brand: product.brand,
+        imageName: product.image,
+        countInStock: product.countInStock,
+        price: product.price,
+        currency: product.currency,
+        shop: request.id,
+        rating: product.rating,
+        isFeatured: product.isFeatured,
+        updatedAt: new Time(product.updatedAt),
+        createdAt: new Time(product.createdAt),
+      };
+
+      return res;
+    });
+
+    return {
+      product: res,
+    };
+  }
+
+  // update product
+  async UpdateProduct(request: UpdateProductRequest): Promise<ProductResponse> {
+    const body = {
+      category: request.category,
+      productName: request.productName,
+      description: request.description,
+      brand: request.brand,
+      image: request.image,
+      countInStock: request.countInStock,
+      price: request.price,
+      currency: request.currency,
+      rating: request.rating,
+      isFeatured: request.isFeatured,
+    };
+    const product = await this.productModel.findByIdAndUpdate(request.id, body);
+
+    if (!product) {
+      throw new GrpcNotFoundException('product not found or deleted');
+    }
+
+    const shop = await this.shopModel.findOne(product.shop).exec();
+
+    if (!shop) {
+      throw new GrpcNotFoundException('shop does not exist');
+    }
+
+    const id = shop._id.toString();
+
+    const res: P = {
+      id: product.id,
+      category: product.category,
+      productName: product.productName,
+      description: product.description,
+      brand: product.brand,
+      imageName: product.image,
+      countInStock: product.countInStock,
+      price: product.price,
+      currency: product.currency,
+      shop: id,
+      rating: product.rating,
+      isFeatured: product.isFeatured,
+      updatedAt: new Time(product.updatedAt),
+      createdAt: new Time(product.createdAt),
+    };
+
+    return {
+      product: res,
+    };
+  }
+
+  // delete product
+  async DeleteProduct(request: DeleteProductRequest): Promise<EmptyRes> {
+    return await this.productModel.findByIdAndDelete(request.id);
   }
 }

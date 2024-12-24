@@ -11,7 +11,6 @@ FROM node:23.4-alpine As prod
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
 COPY app.env .
 
 # Set NODE_ENV for production
