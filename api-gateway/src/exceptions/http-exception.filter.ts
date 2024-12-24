@@ -1,43 +1,31 @@
 import {
-    ExceptionFilter,
-    Catch,
-    ArgumentsHost,
-    HttpException,
-  } from '@nestjs/common';
-  import { Request, Response } from 'express';
-  
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
+import { Request, Response } from 'express';
+import { RpcExceptionFilter } from './rpc-exception.filter';
+import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions';
+import { GRPCToHTTPExceptions } from 'src/helpers/errors';
+
+@Catch()
+export class RpcToHttpExceptionFilter implements ExceptionFilter {
+  catch(exception: any, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    // const request = ctx.getRequest<Request>();
+
+    return new GRPCToHTTPExceptions(exception, response);
+  }
+}
+
+
   @Catch(HttpException)
   export class HttpExceptionFilter implements ExceptionFilter {
-    catch(exception: HttpException, host: ArgumentsHost) {
-      const ctx = host.switchToHttp();
-      const response = ctx.getResponse<Response>();
-      const request = ctx.getRequest<Request>();
-      const status = exception.getStatus();
-  
-      if (process.env.NODE_ENV === 'development'){
-        response.status(status).json({
-          statusCode: status,
-          message: exception.message,
-          stack: exception.stack,
-         // cause: exception.cause,
-          timestamp: new Date().toISOString(),
-          // path: request.url,
-        });
-      }
-
-      response.status(status).json({
-        statusCode: status,
-          message: exception.message,
-          timestamp: new Date().toISOString(),
-          // path: request.url,
-      })
-    }
-  }
-  
-  /*
-  @Catch(UnauthorizedException)
-  export class UnauthorizedExceptionFilter implements ExceptionFilter {
-    catch(exception: UnauthorizedException, host: ArgumentsHost): void {
+    catch(exception: HttpException, host: ArgumentsHost): void {
       const ctx = host.switchToHttp();
       const response = ctx.getResponse<Response>();
       let status = exception.getStatus();
@@ -49,5 +37,4 @@ import {
       });
     }
   }
-  */
   

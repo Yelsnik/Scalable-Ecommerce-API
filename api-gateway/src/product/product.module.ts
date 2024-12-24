@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ProductService } from './product.service';
-import { ShopController } from './shop/shop.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { dirname, join } from 'path';
+import { join } from 'path';
 import { PRODUCT_PACKAGE_NAME as Shop } from 'pb/shop_service';
 import { PRODUCT_PACKAGE_NAME as Product } from 'pb/product_service';
 import { ProductController } from './product.controller';
+import { ShopController } from './shop.controller';
 
 @Module({
   imports: [
@@ -37,6 +37,6 @@ import { ProductController } from './product.controller';
     ]),
   ],
   providers: [ProductService],
-  controllers: [ShopController, ProductController],
+  controllers: [ProductController, ShopController],
 })
 export class ProductModule {}

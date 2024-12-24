@@ -1,6 +1,13 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { ProductServiceClient } from 'pb/product_service';
+import {
+  CreateProductRequest,
+  DeleteProductRequest,
+  GetProductByIdRequest,
+  GetProductsByShopRequest,
+  ProductServiceClient,
+  UpdateProductRequest,
+} from 'pb/product_service';
 import {
   CreateShopRequest,
   DeleteShopRequest,
@@ -30,6 +37,14 @@ export class ProductService implements OnModuleInit {
       this.shopClient.getService<ShopServiceClient>('ShopService');
   }
 
+  /**
+   * Service file for calling grpc shop service
+   * Create shop
+   * Get shop by id
+   * Get shops by owner
+   * Update shop by id
+   * Delete shop
+   */
   createShop(request: CreateShopRequest): Observable<ShopResponse> {
     const res = this.shopService.createShop(request);
     return res;
@@ -54,5 +69,34 @@ export class ProductService implements OnModuleInit {
 
   deleteShop(request: DeleteShopRequest) {
     return this.shopService.deleteShop(request);
+  }
+
+  /**
+   * Service file for calling grpc product service
+   * Add product
+   * Get product by id
+   * Get products by shop
+   * Update product by id
+   * Delete product
+   */
+
+  addProduct(request: CreateProductRequest) {
+    return this.productService.addProduct(request);
+  }
+
+  getProductByID(request: GetProductByIdRequest) {
+    return this.productService.getProductById(request);
+  }
+
+  getProductsByShop(request: GetProductsByShopRequest) {
+    return this.productService.getProductsByShop(request);
+  }
+
+  updateProduct(request: UpdateProductRequest) {
+    return this.productService.updateProduct(request);
+  }
+
+  deleteProduct(request: DeleteProductRequest) {
+    return this.productService.deleteProduct(request);
   }
 }

@@ -21,8 +21,8 @@ import {
   shopBodyDTO,
   updateShopBodyDTO,
   updateShopByIDParam,
-} from '../dto/shop.dto';
-import { ProductService } from '../product.service';
+} from './dto/shop.dto';
+import { ProductService } from './product.service';
 import {
   CreateShopRequest,
   DeleteShopRequest,
@@ -31,11 +31,13 @@ import {
   UpdateShopRequest,
 } from 'pb/shop_service';
 import { lastValueFrom } from 'rxjs';
-import { HttpExceptionFilter } from 'src/exceptions/http-exception.filter';
-import { GRPCToHTTPExceptions } from 'src/helpers/errors';
+import {
+  HttpExceptionFilter,
+  RpcToHttpExceptionFilter,
+} from 'src/exceptions/http-exception.filter';
 
 @Controller('shop')
-@UseFilters(HttpExceptionFilter)
+@UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
 export class ShopController {
   constructor(private readonly productService: ProductService) {}
 
@@ -91,40 +93,32 @@ export class ShopController {
 
   @Get(':id')
   async getShopByID(@Param() params: getShopByIDParam, @Res() response: any) {
-    try {
-      const req: GetShopByIdRequest = {
-        id: params.id,
-      };
-      const shop = this.productService.getShopById(req);
+    const req: GetShopByIdRequest = {
+      id: params.id,
+    };
+    const shop = this.productService.getShopById(req);
 
-      const result = await lastValueFrom(shop);
+    const result = await lastValueFrom(shop);
 
-      return response.status(201).json({
-        message: 'success',
-        data: result,
-      });
-    } catch (err) {
-      new GRPCToHTTPExceptions(err);
-    }
+    return response.status(200).json({
+      message: 'success',
+      data: result,
+    });
   }
 
   @Get(':ownerid')
   async getShopsByOwner(@Param() params: any, @Res() response: any) {
-    try {
-      const request: GetShopsByOwnerRequest = {
-        id: params.id,
-      };
-      const res = this.productService.getShopsByOwner(request);
+    const request: GetShopsByOwnerRequest = {
+      id: params.id,
+    };
+    const res = this.productService.getShopsByOwner(request);
 
-      const shops = await lastValueFrom(res);
+    const shops = await lastValueFrom(res);
 
-      return response.status(201).json({
-        message: 'success',
-        data: shops,
-      });
-    } catch (err) {
-      new GRPCToHTTPExceptions(err);
-    }
+    return response.status(200).json({
+      message: 'success',
+      data: shops,
+    });
   }
 
   @Patch(':id')
@@ -133,41 +127,33 @@ export class ShopController {
     @Body() body: updateShopBodyDTO,
     @Res() response: any,
   ) {
-    try {
-      const request: UpdateShopRequest = {
-        id: params.id,
-        name: body.name,
-        description: body.description,
-      };
+    const request: UpdateShopRequest = {
+      id: params.id,
+      name: body.name,
+      description: body.description,
+    };
 
-      const res = this.productService.updateShop(request);
-      const shop = await lastValueFrom(res);
+    const res = this.productService.updateShop(request);
+    const shop = await lastValueFrom(res);
 
-      return response.status(201).json({
-        message: 'success',
-        data: shop,
-      });
-    } catch (err) {
-      new GRPCToHTTPExceptions(err);
-    }
+    return response.status(200).json({
+      message: 'success',
+      data: shop,
+    });
   }
 
   @Delete(':id')
   async deleteShop(@Param() params: deleteShopParam, @Res() response: any) {
-    try {
-      const request: DeleteShopRequest = {
-        id: params.id,
-      };
+    const request: DeleteShopRequest = {
+      id: params.id,
+    };
 
-      const res = this.productService.deleteShop(request);
+    const res = this.productService.deleteShop(request);
 
-      await lastValueFrom(res);
+    await lastValueFrom(res);
 
-      return response.status(201).json({
-        message: 'successfully deleted shop',
-      });
-    } catch (err) {
-      new GRPCToHTTPExceptions(err);
-    }
+    return response.status(200).json({
+      message: 'successfully deleted shop',
+    });
   }
 }
