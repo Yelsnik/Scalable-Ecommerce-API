@@ -34,6 +34,12 @@ proto:
     --go-grpc_out=cart --go-grpc_opt=paths=source_relative \
     proto/*.proto
 
+proto-product:
+	rm -f product/*.go
+	protoc --proto_path=proto --go_out=product --go_opt=paths=source_relative \
+    --go-grpc_out=product --go-grpc_opt=paths=source_relative \
+    proto/product/*.proto
+
 evans:
 	evans --host localhost --port 9090 -r
 
