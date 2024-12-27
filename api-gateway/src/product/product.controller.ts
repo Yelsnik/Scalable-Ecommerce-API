@@ -11,6 +11,7 @@ import {
   Res,
   UploadedFile,
   UseFilters,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
@@ -33,8 +34,10 @@ import {
   updateProductParamsDTO,
 } from './dto/product.dto';
 import { lastValueFrom } from 'rxjs';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('product')
+@UseGuards(AuthGuard)
 @UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}

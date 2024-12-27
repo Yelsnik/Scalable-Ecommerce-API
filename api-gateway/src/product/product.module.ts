@@ -6,6 +6,8 @@ import { PRODUCT_PACKAGE_NAME as Shop } from 'pb/shop_service';
 import { PRODUCT_PACKAGE_NAME as Product } from 'pb/product_service';
 import { ProductController } from './product.controller';
 import { ShopController } from './shop.controller';
+import { AuthModule } from 'src/auth/auth.module';
+import { AuthService } from 'src/auth/auth.service';
 
 @Module({
   imports: [
@@ -35,6 +37,7 @@ import { ShopController } from './shop.controller';
         },
       },
     ]),
+    AuthModule,
   ],
   providers: [ProductService],
   controllers: [ProductController, ShopController],

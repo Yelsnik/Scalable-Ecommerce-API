@@ -11,6 +11,7 @@ import {
   Res,
   UploadedFile,
   UseFilters,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -35,8 +36,10 @@ import {
   HttpExceptionFilter,
   RpcToHttpExceptionFilter,
 } from 'src/exceptions/http-exception.filter';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('shop')
+@UseGuards(AuthGuard)
 @UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
 export class ShopController {
   constructor(private readonly productService: ProductService) {}
@@ -106,7 +109,7 @@ export class ShopController {
     });
   }
 
-  @Get(':ownerid')
+  @Get('user/:id')
   async getShopsByOwner(@Param() params: any, @Res() response: any) {
     const request: GetShopsByOwnerRequest = {
       id: params.id,
