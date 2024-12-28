@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package cart;
+
+option go_package = "cart-service/cart";
+
+message CreateCartRequest {
+    string user_id = 1; 
+    float total_price = 2;
+}
+
+message CartResponse {
+    string id = 1;
+    string user_id = 2;
+    float total_price = 3;
+}
+
+message GetCartByUserIDRequest {
+    string id = 1;
+}
+
+message GetCartByIDRequest {
+    string id = 1;
+}
+
+message UpdateCartRequest {
+    string id = 1;
+    float total_price = 2;
+}
+
+service CartService {
+    rpc CreateCart(CreateCartRequest) returns (CartResponse){}
+    rpc GetCartByUserID(GetCartByUserIDRequest) returns (CartResponse){}
+    rpc GetCart(GetCartByIDRequest) returns (CartResponse){}
+    rpc UpdateCart(UpdateCartRequest) returns (CartResponse){}
+}

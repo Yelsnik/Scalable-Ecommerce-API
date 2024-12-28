@@ -4,8 +4,11 @@ import {
   AuthServiceClient,
   CreateTokenRequest,
   GetUserByIdRequest,
+  GetUserByIdResponse,
   VerifyTokenRequest,
+  VerifyTokenResponse,
 } from 'pb/auth_service';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -22,11 +25,11 @@ export class AuthService implements OnModuleInit {
     return this.authService.createToken(request);
   }
 
-  verifyToken(request: VerifyTokenRequest) {
+  verifyToken(request: VerifyTokenRequest): Observable<VerifyTokenResponse> {
     return this.authService.verifyToken(request);
   }
 
-  getUserByID(request: GetUserByIdRequest) {
+  getUserByID(request: GetUserByIdRequest): Observable<GetUserByIdResponse> {
     return this.authService.getUserById(request);
   }
 }
