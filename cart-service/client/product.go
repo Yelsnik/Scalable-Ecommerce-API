@@ -1,7 +1,7 @@
 package client
 
 import (
-	"cart-service/product/product"
+	"cart-service/product"
 	"context"
 )
 

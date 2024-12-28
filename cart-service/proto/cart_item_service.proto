@@ -7,15 +7,6 @@ import "cart.proto";
 
 option go_package = "cart-service/cart";
 
-message CreateCartItemRequest {
-    string cart = 1;
-    string product = 2;
-    int64 quantity = 3;
-    float price = 4;
-    string currency = 5;
-    float sub_total = 6;
-}
-
 message CartItemResponse {
     string id = 1;
     string cart = 2;
@@ -30,6 +21,10 @@ message CartItemResponse {
 message CartTxResult {
     CartItemResponse cart_item = 1;
     Cart cart = 2;
+}
+
+message RemoveCartTxResult {
+    Cart cart = 1;
 }
 
 message GetCartItemByIDRequest {
@@ -49,13 +44,24 @@ message GetCartItemByProductIDRequest {
 }
 
 message AddtoCartRequest {
-    string productID = 1;
+    string product_id = 1;
+    int64 quantity = 2;
+    string user_id = 3;
+}
+
+message UpdateCartTxRequest {
+    string id = 1;
     int64 quantity = 2;
 }
 
+message RemoveCartTxRequest {
+    string id = 1;
+}
+
 service CartItemService {
-    rpc AddToCart(AddtoCartRequest) returns (CartTxResult){}
-    rpc CreateCartItem(CreateCartItemRequest) returns (CartItemResponse){}
+    rpc AddToCartTx(AddtoCartRequest) returns (CartTxResult){}
+    rpc UpdateCartTx(UpdateCartTxRequest) returns (CartTxResult){}
+    rpc RemoveCartTx(RemoveCartTxRequest) returns (RemoveCartTxResult){}
     rpc GetCartItem(GetCartItemByIDRequest) returns (CartItemResponse){}
     rpc GetCartItemsByCart(GetCartItemsByCartRequest) returns (GetCartItemsByCartResponse){}
     rpc GetCartItemByProductID(GetCartItemByProductIDRequest) returns (CartItemResponse){}

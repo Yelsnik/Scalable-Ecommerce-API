@@ -36,9 +36,9 @@ proto:
 
 proto-product:
 	rm -f product/*.go
-	protoc --proto_path=proto --go_out=product --go_opt=paths=source_relative \
+	protoc --proto_path=product-proto --go_out=product --go_opt=paths=source_relative \
     --go-grpc_out=product --go-grpc_opt=paths=source_relative \
-    proto/product/*.proto
+    product-proto/*.proto
 
 evans:
 	evans --host localhost --port 7070 -r

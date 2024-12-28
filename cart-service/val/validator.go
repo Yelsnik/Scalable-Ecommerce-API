@@ -2,6 +2,7 @@ package val
 
 import (
 	"fmt"
+	"math"
 	"net/mail"
 	"regexp"
 )
@@ -16,6 +17,17 @@ func ValidateString(value string, minLength int, maxLength int) error {
 	if n < minLength || n > maxLength {
 		return fmt.Errorf("must contain from %d-%d characters", minLength, maxLength)
 	}
+	return nil
+}
+
+func ValidateFloat(float float64) error {
+	if math.IsNaN(float) {
+		return fmt.Errorf("value is NaN")
+	}
+	if math.IsInf(float, 0) {
+		return fmt.Errorf("value is Infinity")
+	}
+
 	return nil
 }
 

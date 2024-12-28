@@ -111,17 +111,19 @@ type RemoveCartTxResult struct {
 	Cart Cart `json:"cart"`
 }
 
-func (store *SQLStore) RemoveCartTx(ctx context.Context, cartItemID, cartID uuid.UUID) (RemoveCartTxResult, error) {
+func (store *SQLStore) RemoveCartTx(ctx context.Context, cartItemID uuid.UUID) (RemoveCartTxResult, error) {
 	var result RemoveCartTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
+		var cartId uuid.UUID
 
 		// get cart item
 		cartItem, err := q.GetCartitemForUpdate(ctx, cartItemID)
 		if err != nil {
 			return err
 		}
+		cartId = cartItem.Cart
 
 		// delete cart item
 		err = q.DeleteCartitem(ctx, cartItem.ID)
@@ -130,14 +132,14 @@ func (store *SQLStore) RemoveCartTx(ctx context.Context, cartItemID, cartID uuid
 		}
 
 		// add cart item subtotal to get total price
-		total, err := q.AddSubtotalPrice(ctx, cartID)
+		total, err := q.AddSubtotalPrice(ctx, cartId)
 		if err != nil {
 			return err
 		}
 
 		// update cart total
 		result.Cart, err = q.UpdateCart(ctx, UpdateCartParams{
-			ID:         cartID,
+			ID:         cartId,
 			TotalPrice: total,
 		})
 

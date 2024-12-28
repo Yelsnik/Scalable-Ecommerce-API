@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package product;
 
-import "product/file.proto";
+import "file.proto";
 
 import "google/protobuf/timestamp.proto";
 

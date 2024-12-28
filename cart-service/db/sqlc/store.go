@@ -12,7 +12,7 @@ type Store interface {
 	Querier
 	AddToCartTx(ctx context.Context, arg CreateCartitemParams) (CartTxResult, error)
 	UpdateCartTx(ctx context.Context, cartItemID uuid.UUID, arg UpdateCartitemParams) (CartTxResult, error)
-	RemoveCartTx(ctx context.Context, cartItemID, cartID uuid.UUID) (RemoveCartTxResult, error)
+	RemoveCartTx(ctx context.Context, cartItemID uuid.UUID) (RemoveCartTxResult, error)
 }
 
 type SQLStore struct {

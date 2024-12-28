@@ -130,3 +130,33 @@ func TestUpdateCartTx(t *testing.T) {
 		require.NotZero(t, cartItemResult.CreatedAt)
 	}
 }
+
+func TestRemoveCartTx(t *testing.T) {
+	n := 20
+
+	for i := 0; i < n; i++ {
+		cartItem := createNewCartItem(t)
+
+		errs := make(chan error, 5)
+		results := make(chan RemoveCartTxResult, 5)
+
+		txName := fmt.Sprintf("tx %d", i+1)
+		go func() {
+			ctx := context.WithValue(context.Background(), txKey, txName)
+			result, err := testStore.RemoveCartTx(ctx, cartItem.ID)
+
+			results <- result
+			errs <- err
+		}()
+
+		err := <-errs
+		require.NoError(t, err)
+
+		result := <-results
+		require.NotEmpty(t, result)
+
+		cartResult := result.Cart
+		require.Equal(t, float64(0), cartResult.TotalPrice)
+
+	}
+}
