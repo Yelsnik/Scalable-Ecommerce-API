@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package product;
 
-import "google/protobuf/any.proto";
 import "product/file.proto";
 
 import "google/protobuf/timestamp.proto";
@@ -10,7 +9,7 @@ import "google/protobuf/timestamp.proto";
 option go_package = "cart-service/product";
 
 message Product {
-    google.protobuf.Any id = 1;
+    string id = 1;
     string category = 2;
     string product_name = 3;
     string description = 4;

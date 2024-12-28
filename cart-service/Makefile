@@ -41,6 +41,7 @@ proto-product:
     proto/product/*.proto
 
 evans:
-	evans --host localhost --port 9090 -r
+	evans --host localhost --port 7070 -r
+
 
 .PHONY: postgres createdb dropdb migrateup migratedown sqlc test server new_migration mock proto evans

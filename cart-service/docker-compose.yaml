@@ -12,7 +12,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "7070:7070"
     environment:
       - DB_SOURCE=postgresql://root:mahanta@postgres:5432/e_commerce_cart?sslmode=disable
     depends_on:

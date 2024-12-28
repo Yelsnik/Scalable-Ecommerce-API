@@ -3,6 +3,7 @@ package gapi
 import (
 	pb "cart-service/cart"
 	db "cart-service/db/sqlc"
+	"cart-service/product/product"
 	"cart-service/util"
 	"database/sql"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (server *Server) AddToCart(ctx context.Context, req *pb.AddtoCartRequest) (*pb.CartTxResult, error) {
@@ -39,10 +41,9 @@ func (server *Server) AddToCart(ctx context.Context, req *pb.AddtoCartRequest) (
 		return nil, status.Errorf(codes.Internal, "Invalid id %s", err)
 	}
 
-	product, err := server.store.GetProducts(ctx, id)
+	product, err := server.client.GetProductByID(ctx, req.ProductID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
+		return nil, status.Errorf(codes.Internal, "failed to get product %s", err)
 	}
 
 	// check if cart items exists
@@ -74,36 +75,45 @@ func (server *Server) AddToCart(ctx context.Context, req *pb.AddtoCartRequest) (
 			}
 
 			// create cart item
-			writeResponse(req, cart, product, ctx, server)
+			result, err := writeResponse(req, cart, product, ctx, server)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "failed to add to cart %s", err)
+			}
+
+			return result, nil
 		}
 
 		return nil, status.Error(codes.Internal, "failed to find cart")
 	}
 
 	// create cart item
-	writeResponse(req, cart, product, ctx, server)
+	result, err := writeResponse(req, cart, product, ctx, server)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to add to cart %s", err)
+	}
 
-	return nil, nil
+	return result, nil
+
 }
 
-func writeResponse(req *pb.AddtoCartRequest, cart db.Cart, product db.Product, ctx context.Context, server *Server) (*pb.CartTxResult, error) {
+func writeResponse(req *pb.AddtoCartRequest, cart db.Cart, product *product.ProductResponse, ctx context.Context, server *Server) (*pb.CartTxResult, error) {
 	if req.Quantity == 0 {
 		req.Quantity = 1
 	}
 
-	if req.Quantity > product.CountInStock {
-		message := fmt.Sprintf("The number of %s you want to buy has exceeded the quantity available for sale", product.ProductName)
+	if req.Quantity > product.Product.CountInStock {
+		message := fmt.Sprintf("The number of %s you want to buy has exceeded the quantity available for sale", product.Product.ProductName)
 		return nil, status.Errorf(codes.InvalidArgument, "%s", message)
 	}
 
-	subTotal := product.Price * float64(1)
+	subTotal := product.Product.Price * float32(req.Quantity)
 	arg := db.CreateCartitemParams{
 		Cart:     cart.ID,
-		Product:  product.ID,
+		Product:  product.Product.Id.String(),
 		Quantity: req.Quantity,
-		Price:    product.Price,
-		Currency: product.Currency,
-		SubTotal: subTotal,
+		Price:    float64(product.Product.Price),
+		Currency: product.Product.Currency,
+		SubTotal: float64(subTotal),
 	}
 
 	result, err := server.store.AddToCartTx(ctx, arg)
@@ -111,7 +121,23 @@ func writeResponse(req *pb.AddtoCartRequest, cart db.Cart, product db.Product, c
 		return nil, status.Errorf(codes.Internal, "failed to add to cart %s", err)
 	}
 
-	response := newCartResponse(result)
+	response := &pb.CartTxResult{
+		CartItem: &pb.CartItemResponse{
+			Id:        result.CartItem.ID.String(),
+			Cart:      result.CartItem.Cart.String(),
+			Product:   result.CartItem.Product,
+			Quantity:  result.CartItem.Quantity,
+			Price:     float32(result.CartItem.Price),
+			Currency:  result.CartItem.Currency,
+			SubTotal:  float32(result.CartItem.SubTotal),
+			CreatedAt: timestamppb.New(result.CartItem.CreatedAt),
+		},
+		Cart: &pb.Cart{
+			Id:         result.Cart.ID.String(),
+			UserId:     result.Cart.ID.String(),
+			TotalPrice: float32(result.Cart.TotalPrice),
+		},
+	}
 
 	return response, nil
 }
