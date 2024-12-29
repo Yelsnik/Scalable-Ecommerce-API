@@ -36,7 +36,7 @@ import {
 import { lastValueFrom } from 'rxjs';
 import { AuthGuard } from 'src/auth/auth.guard';
 
-@Controller('product')
+@Controller({ path: 'product', version: '1' })
 @UseGuards(AuthGuard)
 @UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
 export class ProductController {

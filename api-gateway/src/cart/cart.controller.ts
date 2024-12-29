@@ -8,18 +8,27 @@ import {
   UseFilters,
   UseGuards,
   Req,
+  Get,
+  Patch,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { AddtoCartBodyDTO, AddToCartParamsDTO } from './dto/cart-item.dto';
+import {
+  AddtoCartBodyDTO,
+  AddToCartParamsDTO,
+  GetCartItemByIDParamsDTO,
+  GetCartItemsByCartParamsDTO,
+  RemoveCartItemDTO,
+  UpdateCartItemBodyDTO,
+  UpdateCartItemDTO,
+} from './dto/cart-item.dto';
 import { lastValueFrom } from 'rxjs';
 import { AuthGuard } from 'src/auth/auth.guard';
 import {
   RpcToHttpExceptionFilter,
   HttpExceptionFilter,
 } from 'src/exceptions/http-exception.filter';
-import { Metadata, ServerUnaryCall } from '@grpc/grpc-js';
 
-@Controller('cart')
+@Controller({ path: 'cart', version: '1' })
 @UseGuards(AuthGuard)
 @UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
 export class CartController {
@@ -42,8 +51,60 @@ export class CartController {
     });
   }
 
+  @Get('items/:id')
+  async getCartItemsByCart(
+    @Param() params: GetCartItemsByCartParamsDTO,
+    @Res() response: any,
+  ) {
+    const res = this.cartService.getCartItemsByCart(params);
+
+    const carts = await lastValueFrom(res);
+
+    response.status(200).json({
+      message: 'success',
+      data: carts,
+    });
+  }
+
+  @Get(':id')
+  async getCartItemsByID(
+    @Param() params: GetCartItemByIDParamsDTO,
+    @Res() response: any,
+  ) {
+    const res = this.cartService.getCartItemById(params);
+
+    const cart = await lastValueFrom(res);
+
+    response.status(200).json({
+      message: 'success',
+      data: cart,
+    });
+  }
+
+  @Patch(':id')
+  async updateCart(
+    @Param() params: UpdateCartItemDTO,
+    @Body() body: UpdateCartItemBodyDTO,
+    @Res() response: any,
+  ) {
+    const res = this.cartService.updateCart(params, body);
+
+    const cart = await lastValueFrom(res);
+
+    response.status(200).json({
+      message: 'success',
+      data: cart,
+    });
+  }
+
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
+  async remove(@Param() param: RemoveCartItemDTO, @Res() response: any) {
+    const res = this.cartService.remove(param);
+
+    await lastValueFrom(res);
+
+    response.status(200).json({
+      message: 'successfully deleted!',
+    });
   }
 }

@@ -38,7 +38,7 @@ import {
 } from 'src/exceptions/http-exception.filter';
 import { AuthGuard } from 'src/auth/auth.guard';
 
-@Controller('shop')
+@Controller({ path: 'shop', version: '1' })
 @UseGuards(AuthGuard)
 @UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
 export class ShopController {

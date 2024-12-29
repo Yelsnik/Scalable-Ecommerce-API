@@ -14,7 +14,15 @@ import {
 } from 'pb/cart_item_service';
 import { CartServiceClient } from 'pb/cart_service';
 import { Observable } from 'rxjs';
-import { AddtoCartBodyDTO, AddToCartParamsDTO } from './dto/cart-item.dto';
+import {
+  AddtoCartBodyDTO,
+  AddToCartParamsDTO,
+  GetCartItemByIDParamsDTO,
+  GetCartItemsByCartParamsDTO,
+  RemoveCartItemDTO,
+  UpdateCartItemBodyDTO,
+  UpdateCartItemDTO,
+} from './dto/cart-item.dto';
 
 @Injectable()
 export class CartService implements OnModuleInit {
@@ -51,7 +59,9 @@ export class CartService implements OnModuleInit {
     return this.cartItemService.addToCartTx(request);
   }
 
-  getCartItemsByCart(params: any): Observable<GetCartItemsByCartResponse> {
+  getCartItemsByCart(
+    params: GetCartItemsByCartParamsDTO,
+  ): Observable<GetCartItemsByCartResponse> {
     const request: GetCartItemsByCartRequest = {
       id: params.id,
     };
@@ -59,7 +69,9 @@ export class CartService implements OnModuleInit {
     return this.cartItemService.getCartItemsByCart(request);
   }
 
-  getCartItemById(params: any): Observable<CartItemResponse> {
+  getCartItemById(
+    params: GetCartItemByIDParamsDTO,
+  ): Observable<CartItemResponse> {
     const request: GetCartItemByIDRequest = {
       id: params.id,
     };
@@ -67,7 +79,10 @@ export class CartService implements OnModuleInit {
     return this.cartItemService.getCartItem(request);
   }
 
-  updateCart(params: any, body: any): Observable<CartTxResult> {
+  updateCart(
+    params: UpdateCartItemDTO,
+    body: UpdateCartItemBodyDTO,
+  ): Observable<CartTxResult> {
     const request: UpdateCartTxRequest = {
       id: params.id,
       quantity: body.quantity,
@@ -76,7 +91,7 @@ export class CartService implements OnModuleInit {
     return this.cartItemService.updateCartTx(request);
   }
 
-  remove(params: any): Observable<RemoveCartTxResult> {
+  remove(params: RemoveCartItemDTO): Observable<RemoveCartTxResult> {
     const request: RemoveCartTxRequest = {
       id: params.id,
     };
