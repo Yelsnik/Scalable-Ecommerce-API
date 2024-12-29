@@ -65,7 +65,7 @@ func (server *Server) UpdateCartTx(ctx context.Context, req *pb.UpdateCartTxRequ
 		},
 		Cart: &pb.Cart{
 			Id:         result.Cart.ID.String(),
-			UserId:     result.Cart.ID.String(),
+			UserId:     result.Cart.UserID.String(),
 			TotalPrice: float32(result.Cart.TotalPrice),
 		},
 	}

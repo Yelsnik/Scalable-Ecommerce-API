@@ -17,7 +17,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (server *Server) AddToCart(ctx context.Context, req *pb.AddtoCartRequest) (*pb.CartTxResult, error) {
+func (server *Server) AddToCartTx(ctx context.Context, req *pb.AddtoCartRequest) (*pb.CartTxResult, error) {
 	// validate the request
 	violations := validateAddToCartRequest(req)
 	if violations != nil {
@@ -129,7 +129,7 @@ func writeResponse(req *pb.AddtoCartRequest, cart db.Cart, product *product.Prod
 		},
 		Cart: &pb.Cart{
 			Id:         result.Cart.ID.String(),
-			UserId:     result.Cart.ID.String(),
+			UserId:     result.Cart.UserID.String(),
 			TotalPrice: float32(result.Cart.TotalPrice),
 		},
 	}
