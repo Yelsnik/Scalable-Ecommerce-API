@@ -13,6 +13,7 @@ import (
 // serves gRPC requests for our banking service
 type Server struct {
 	pb.UnimplementedUserServiceServer
+	pb.UnimplementedAuthServiceServer
 	config     util.Config
 	store      db.Store
 	tokenMaker token.Maker

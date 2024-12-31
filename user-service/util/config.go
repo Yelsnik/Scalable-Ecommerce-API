@@ -18,6 +18,7 @@ type Config struct {
 	EmailSenderAddress         string        `mapstructure:"EMAIL_SENDER_ADDRESS"`
 	EmailSenderPassword        string        `mapstructure:"EMAIL_SENDER_PASSWORD"`
 	PasswordResetTokenDuration time.Duration `mapstructure:"PASSWORD_RESET_TOKEN_DURATION"`
+	StripeSecretKey            string        `mapstructure:"STRIPE_SECRET_KEY"`
 	//PasswordResetTokenDuration time.Duration `mapstructure:"PASSWORD_RESET_TOKEN_DURATION"`
 }
 

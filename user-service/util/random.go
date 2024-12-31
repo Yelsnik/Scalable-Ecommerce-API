@@ -115,3 +115,7 @@ func ConvertStringToUUID(id string) (uuid.UUID, error) {
 
 	return uuid, err
 }
+
+func ConvertUUIDToString(uuid uuid.UUID) string {
+	return uuid.String()
+}

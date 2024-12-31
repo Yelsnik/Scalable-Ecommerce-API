@@ -29,6 +29,12 @@ type Session struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
+type StripeAccount struct {
+	ID        string    `json:"id"`
+	UserID    uuid.UUID `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`

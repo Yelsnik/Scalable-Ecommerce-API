@@ -28,7 +28,14 @@ CREATE TABLE "password_reset_tokens" (
   "created_at" timestamptz NOT NULL DEFAULT 'now()'
 );
 
+CREATE TABLE "stripe_accounts" (
+  "id" varchar NOT NULL,
+  "user_id" uuid NOT NULL,
+  "created_at" timestamptz NOT NULL DEFAULT 'now()'
+);
+
 ALTER TABLE "sessions" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
 ALTER TABLE "password_reset_tokens" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
+ALTER TABLE "stripe_accounts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");

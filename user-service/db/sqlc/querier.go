@@ -13,10 +13,12 @@ import (
 type Querier interface {
 	CreatePasswordResetToken(ctx context.Context, arg CreatePasswordResetTokenParams) (PasswordResetToken, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
+	CreateStripeAccount(ctx context.Context, arg CreateStripeAccountParams) (StripeAccount, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	GetPasswordResetToken(ctx context.Context, id uuid.UUID) (PasswordResetToken, error)
 	GetPasswordResetTokenByToken(ctx context.Context, token string) (PasswordResetToken, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
+	GetStripeAccountById(ctx context.Context, id string) (StripeAccount, error)
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)

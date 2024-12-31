@@ -19,7 +19,7 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 		if err == sql.ErrNoRows {
 			return nil, status.Errorf(codes.NotFound, "user not found: %s", err)
 		}
-		return nil, status.Errorf(codes.Internal, "failed to file user: %s", err)
+		return nil, status.Errorf(codes.Internal, "failed to find user: %s", err)
 	}
 
 	err = util.CheckPassword(req.Password, user.Password)

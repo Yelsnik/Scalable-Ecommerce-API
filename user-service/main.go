@@ -14,6 +14,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	_ "github.com/lib/pq"
+	"github.com/stripe/stripe-go/v81"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -23,6 +24,8 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}
+
+	stripe.Key = config.StripeSecretKey
 
 	// connect to database
 	conn, err := sql.Open(config.DBDriver, config.DBSource)
@@ -44,6 +47,7 @@ func runGrpcServer(config util.Config, store db.Store) {
 
 	// create a new grpc server
 	grpcServer := grpc.NewServer()
+	pb.RegisterAuthServiceServer(grpcServer, server)
 	pb.RegisterUserServiceServer(grpcServer, server)
 	reflection.Register(grpcServer)
 
