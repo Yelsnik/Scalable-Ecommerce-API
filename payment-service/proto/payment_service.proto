@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package payment;
+
+option go_package = "payment-service/payment";
+
+message StripeCustomerRequest {
+    string email = 1;
+    string token = 2;
+}
+
+message StripeCustomerResponse {
+    string email = 1;
+}
+
+service PaymentService {
+    rpc StripeCustomer(StripeCustomerRequest) returns (StripeCustomerResponse);
+}
