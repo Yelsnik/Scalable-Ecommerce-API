@@ -20,6 +20,13 @@ func ValidateString(value string, minLength int, maxLength int) error {
 	return nil
 }
 
+func ValidateBool(b *bool) error {
+	if b == nil {
+		return fmt.Errorf("bool is not set")
+	}
+	return nil
+}
+
 func ValidateFloat(float float64) error {
 	if math.IsNaN(float) {
 		return fmt.Errorf("value is NaN")

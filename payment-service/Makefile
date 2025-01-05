@@ -31,4 +31,5 @@ proto:
     --go-grpc_out=payment --go-grpc_opt=paths=source_relative \
     proto/*.proto
 
+
 .PHONY: postgres createdb dropdb migrateup new_migration sqlc server evans proto

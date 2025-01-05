@@ -9,3 +9,7 @@ INSERT INTO stripe_customers (
 -- name: GetStripeCustomerById :one
 SELECT * FROM stripe_customers 
 WHERE id = $1 LIMIT 1;
+
+-- name: GetStripeCustomerByUserId :one
+SELECT * FROM stripe_customers 
+WHERE user_id = $1 LIMIT 1;
