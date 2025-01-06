@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_GetUserByID_FullMethodName        = "/pb.AuthService/GetUserByID"
-	AuthService_GetUserByEmail_FullMethodName     = "/pb.AuthService/GetUserByEmail"
-	AuthService_CreateToken_FullMethodName        = "/pb.AuthService/CreateToken"
-	AuthService_VerifyToken_FullMethodName        = "/pb.AuthService/VerifyToken"
-	AuthService_ExchangeStripeCode_FullMethodName = "/pb.AuthService/ExchangeStripeCode"
+	AuthService_GetUserByID_FullMethodName            = "/pb.AuthService/GetUserByID"
+	AuthService_GetUserByEmail_FullMethodName         = "/pb.AuthService/GetUserByEmail"
+	AuthService_CreateToken_FullMethodName            = "/pb.AuthService/CreateToken"
+	AuthService_VerifyToken_FullMethodName            = "/pb.AuthService/VerifyToken"
+	AuthService_ExchangeStripeCode_FullMethodName     = "/pb.AuthService/ExchangeStripeCode"
+	AuthService_GetStripeSellerAccount_FullMethodName = "/pb.AuthService/GetStripeSellerAccount"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -35,6 +36,7 @@ type AuthServiceClient interface {
 	CreateToken(ctx context.Context, in *CreateTokenRequest, opts ...grpc.CallOption) (*CreateTokenResponse, error)
 	VerifyToken(ctx context.Context, in *VerifyTokenRequest, opts ...grpc.CallOption) (*VerifyTokenResponse, error)
 	ExchangeStripeCode(ctx context.Context, in *ExchangeCodeRequest, opts ...grpc.CallOption) (*ExchangeCodeResponse, error)
+	GetStripeSellerAccount(ctx context.Context, in *StripeSellerAccountRequest, opts ...grpc.CallOption) (*StripeSellerAccountResponse, error)
 }
 
 type authServiceClient struct {
@@ -95,6 +97,16 @@ func (c *authServiceClient) ExchangeStripeCode(ctx context.Context, in *Exchange
 	return out, nil
 }
 
+func (c *authServiceClient) GetStripeSellerAccount(ctx context.Context, in *StripeSellerAccountRequest, opts ...grpc.CallOption) (*StripeSellerAccountResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StripeSellerAccountResponse)
+	err := c.cc.Invoke(ctx, AuthService_GetStripeSellerAccount_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type AuthServiceServer interface {
 	CreateToken(context.Context, *CreateTokenRequest) (*CreateTokenResponse, error)
 	VerifyToken(context.Context, *VerifyTokenRequest) (*VerifyTokenResponse, error)
 	ExchangeStripeCode(context.Context, *ExchangeCodeRequest) (*ExchangeCodeResponse, error)
+	GetStripeSellerAccount(context.Context, *StripeSellerAccountRequest) (*StripeSellerAccountResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedAuthServiceServer) VerifyToken(context.Context, *VerifyTokenR
 }
 func (UnimplementedAuthServiceServer) ExchangeStripeCode(context.Context, *ExchangeCodeRequest) (*ExchangeCodeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExchangeStripeCode not implemented")
+}
+func (UnimplementedAuthServiceServer) GetStripeSellerAccount(context.Context, *StripeSellerAccountRequest) (*StripeSellerAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStripeSellerAccount not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -240,6 +256,24 @@ func _AuthService_ExchangeStripeCode_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_GetStripeSellerAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StripeSellerAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GetStripeSellerAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GetStripeSellerAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GetStripeSellerAccount(ctx, req.(*StripeSellerAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ExchangeStripeCode",
 			Handler:    _AuthService_ExchangeStripeCode_Handler,
+		},
+		{
+			MethodName: "GetStripeSellerAccount",
+			Handler:    _AuthService_GetStripeSellerAccount_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

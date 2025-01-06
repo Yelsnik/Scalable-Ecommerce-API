@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package product;
+
+import "product-service/file.proto";
+
+option go_package = "E-commerce/payment-service/product";
+
+message CreateShopRequest{
+    string name = 1;
+    string description = 2;
+    string shopOwner = 3;
+    File image = 4;
+}
+
+message ShopResponse{
+    Shop shop = 1;
+}
+
+message GetShopByIdRequest {
+    string id = 1;
+}
+
+message GetShopsByOwnerRequest {
+    string id = 1;
+}
+
+message GetShopsByOwnerResponse {
+    repeated Shop shops = 1;
+}
+
+message UpdateShopRequest {
+    string id = 1;
+    optional string name = 2;
+    optional string description = 3;
+}
+
+message DeleteShopRequest {
+    string id = 1;
+}
+
+message Empty {}
+
+message Shop {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string imageName = 4;
+    string shopOwner = 5;
+}
+
+service ShopService {
+    rpc CreateShop(CreateShopRequest) returns (ShopResponse){}
+    rpc GetShopByID(GetShopByIdRequest) returns (ShopResponse) {}
+    rpc GetShopsByOwner(GetShopsByOwnerRequest) returns (GetShopsByOwnerResponse) {}
+    rpc UpdateShop(UpdateShopRequest) returns (ShopResponse) {}
+    rpc DeleteShop(DeleteShopRequest) returns (Empty) {}
+}

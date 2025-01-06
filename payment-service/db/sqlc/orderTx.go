@@ -8,11 +8,11 @@ import (
 )
 
 type OrderTxResult struct {
-	Order     Order                  `json:"order"`
-	OrderItem OrderItem              `json:"order_item"`
-	Cart      *cart.CartResponse     `json:"cart"`
-	CartItem  *cart.CartItemResponse `json:"cart_item"`
-	Payment   Payment                `json:"payment"`
+	Order     Order                    `json:"order"`
+	OrderItem OrderItem                `json:"order_item"`
+	Cart      *cart.RemoveCartTxResult `json:"cart"`
+	CartItem  *cart.CartItemResponse   `json:"cart_item"`
+	Payment   Payment                  `json:"payment"`
 }
 
 type OrderTxParams struct {
@@ -84,6 +84,12 @@ func (store *SQLStore) CreateOrderTx(ctx context.Context, cartItemID string, arg
 			ItemID:       product.Product.Id,
 			OrderID:      result.Order.ID,
 		})
+
+		// remove the cart item
+		result.Cart, err = store.client.RemoveCartTx(ctx, cartItemID)
+		if err != nil {
+			return err
+		}
 
 		return err
 	})

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package pb;
 
-import "user.proto";
+import "user-service/user.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
 

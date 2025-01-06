@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package product;
 
-option go_package = "cart-service/product";
+option go_package = "E-commerce/payment-service/product";
 
 message File {
     bytes buffer = 1;

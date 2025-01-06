@@ -48,9 +48,9 @@ export class AllExceptionFilter implements RpcExceptionFilter {
 
     // Handle Type Errors
     if (exception instanceof TypeError) {
-      console.log(exception.name);
+      console.log(exception);
       return {
-        code: 3,
+        code: 13,
         message: 'Type error occurred',
         details: exception.message,
       };
@@ -65,7 +65,6 @@ export class AllExceptionFilter implements RpcExceptionFilter {
         details: Object.keys(exception.keyPattern).join(', '),
       };
     }
-
   }
 }
 

@@ -43,3 +43,15 @@ func (q *Queries) GetStripeAccountById(ctx context.Context, id string) (StripeAc
 	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
 	return i, err
 }
+
+const getStripeAccountByUserId = `-- name: GetStripeAccountByUserId :one
+SELECT id, user_id, created_at FROM stripe_accounts 
+WHERE user_id = $1 LIMIT 1
+`
+
+func (q *Queries) GetStripeAccountByUserId(ctx context.Context, userID uuid.UUID) (StripeAccount, error) {
+	row := q.db.QueryRowContext(ctx, getStripeAccountByUserId, userID)
+	var i StripeAccount
+	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
+	return i, err
+}

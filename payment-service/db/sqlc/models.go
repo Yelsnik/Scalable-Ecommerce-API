@@ -27,7 +27,7 @@ type OrderItem struct {
 	ItemName     string    `json:"item_name"`
 	ItemSubTotal float64   `json:"item_sub_total"`
 	Quantity     int64     `json:"quantity"`
-	ItemID       uuid.UUID `json:"item_id"`
+	ItemID       string    `json:"item_id"`
 	OrderID      uuid.UUID `json:"order_id"`
 	CreatedAt    time.Time `json:"created_at"`
 }

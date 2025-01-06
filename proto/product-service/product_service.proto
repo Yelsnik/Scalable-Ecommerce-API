@@ -2,11 +2,12 @@ syntax = "proto3";
 
 package product;
 
-import "file.proto";
+import "product-service/file.proto";
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "cart-service/product";
+option go_package = "E-commerce/payment-service/product";
+
 
 message Product {
     string id = 1;

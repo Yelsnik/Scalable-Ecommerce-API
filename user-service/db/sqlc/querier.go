@@ -19,6 +19,7 @@ type Querier interface {
 	GetPasswordResetTokenByToken(ctx context.Context, token string) (PasswordResetToken, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 	GetStripeAccountById(ctx context.Context, id string) (StripeAccount, error)
+	GetStripeAccountByUserId(ctx context.Context, userID uuid.UUID) (StripeAccount, error)
 	GetUser(ctx context.Context, id uuid.UUID) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)

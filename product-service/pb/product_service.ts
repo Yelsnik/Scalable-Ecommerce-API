@@ -8,13 +8,12 @@
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
 import { File } from "./file";
-import { Any } from "./google/protobuf/any";
 import { Timestamp } from "./google/protobuf/timestamp";
 
 export const protobufPackage = "product";
 
 export interface Product {
-  id: Any | undefined;
+  id: string;
   category: string;
   productName: string;
   description: string;

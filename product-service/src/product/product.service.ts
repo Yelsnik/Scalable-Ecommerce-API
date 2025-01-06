@@ -1,6 +1,4 @@
-import {
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { GridFsService } from 'src/grid-fs/grid-fs.service';
 import { Product } from './product.schema';
@@ -17,7 +15,7 @@ import {
   EmptyRes,
 } from 'pb/product_service';
 import { Shop } from 'src/shop/shop.schema';
-import { Time } from 'src/interface/interface';
+import { TimestampUtils } from 'src/interface/interface';
 import { GrpcNotFoundException } from 'nestjs-grpc-exceptions';
 
 @Injectable()
@@ -33,7 +31,13 @@ export class ProductService {
     const buffer = Buffer.from(request.image.buffer);
     const file = this.gridFs.loadImage(request.image, buffer);
 
-    const id = await this.gridFs.uploadFile(file, 'shop-image');
+    const id = await this.gridFs.uploadFile(file, 'product-image');
+
+    const shop = await this.shopModel.findOne({ _id: request.shop }).exec();
+
+    if (!shop) {
+      throw new GrpcNotFoundException('shop does not exist');
+    }
 
     const product = await this.productModel.create({
       category: request.category,
@@ -50,8 +54,10 @@ export class ProductService {
       isFeatured: request.isFeatured,
     });
 
+    const pi: string = product.id;
+
     const response: P = {
-      id: product.id,
+      id: pi,
       category: product.category,
       productName: product.productName,
       description: product.description,
@@ -63,8 +69,8 @@ export class ProductService {
       shop: request.shop,
       rating: product.rating,
       isFeatured: product.isFeatured,
-      updatedAt: new Time(product.updatedAt),
-      createdAt: new Time(product.createdAt),
+      updatedAt: undefined,
+      createdAt: TimestampUtils.dateToTimestamp(product.createdAt),
     };
 
     return {
@@ -103,8 +109,8 @@ export class ProductService {
       shop: id,
       rating: product.rating,
       isFeatured: product.isFeatured,
-      updatedAt: new Time(product.updatedAt),
-      createdAt: new Time(product.createdAt),
+      updatedAt: undefined,
+      createdAt: TimestampUtils.dateToTimestamp(product.createdAt),
     };
 
     return {
@@ -136,8 +142,8 @@ export class ProductService {
         shop: request.id,
         rating: product.rating,
         isFeatured: product.isFeatured,
-        updatedAt: new Time(product.updatedAt),
-        createdAt: new Time(product.createdAt),
+        updatedAt: undefined,
+        createdAt: TimestampUtils.dateToTimestamp(product.createdAt),
       };
 
       return res;
@@ -189,8 +195,8 @@ export class ProductService {
       shop: id,
       rating: product.rating,
       isFeatured: product.isFeatured,
-      updatedAt: new Time(product.updatedAt),
-      createdAt: new Time(product.createdAt),
+      updatedAt: TimestampUtils.dateToTimestamp(product.updatedAt),
+      createdAt: TimestampUtils.dateToTimestamp(product.createdAt),
     };
 
     return {
