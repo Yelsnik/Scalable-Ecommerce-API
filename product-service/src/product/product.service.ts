@@ -3,20 +3,21 @@ import { Model } from 'mongoose';
 import { GridFsService } from 'src/grid-fs/grid-fs.service';
 import { Product } from './product.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  CreateProductRequest,
-  ProductResponse,
-  Product as P,
-  GetProductByIdRequest,
-  GetProductsByShopRequest,
-  GetProductsByShopResponse,
-  UpdateProductRequest,
-  DeleteProductRequest,
-  EmptyRes,
-} from 'pb/product_service';
 import { Shop } from 'src/shop/shop.schema';
 import { TimestampUtils } from 'src/interface/interface';
 import { GrpcNotFoundException } from 'nestjs-grpc-exceptions';
+import {
+  CreateProductRequest,
+  DeleteProductRequest,
+  EmptyRes,
+  GetProductByIdRequest,
+  GetProductsByShopResponse,
+  Product as P,
+  ProductResponse,
+  ProductsByShopRequest,
+  UpdateProductRequest,
+} from 'pb/product-service/product_service';
+import { ApiFeatures } from 'src/helpers/apiFeatures';
 
 @Injectable()
 export class ProductService {
@@ -120,9 +121,35 @@ export class ProductService {
 
   // get product by shop
   async GetProductsByShop(
-    request: GetProductsByShopRequest,
+    request: ProductsByShopRequest,
   ): Promise<GetProductsByShopResponse> {
-    const products = await this.productModel.find({ shop: request.id }).exec();
+    let queryString: string;
+    let features: ApiFeatures;
+
+    if (request.queryString) {
+      //queryString = JSON.parse(request.queryString);
+      features = new ApiFeatures(
+        this.productModel.find({ shop: request.id }),
+        {},
+      )
+        .filter()
+        .sort()
+        .limit()
+        .pagination();
+    } else {
+      features = new ApiFeatures(
+        this.productModel.find({ shop: request.id }),
+        {},
+      )
+        .filter()
+        .sort()
+        .limit()
+        .pagination();
+    }
+
+    const products = await features.query;
+
+    console.log(request);
 
     if (!products) {
       throw new GrpcNotFoundException('Products not found');

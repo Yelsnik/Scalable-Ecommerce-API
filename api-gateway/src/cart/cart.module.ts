@@ -13,10 +13,7 @@ import { AuthModule } from 'src/auth/auth.module';
         transport: Transport.GRPC,
         options: {
           package: 'cart',
-          protoPath: join(
-            __dirname,
-            'proto/cart-service/cart_item_service.proto',
-          ),
+          protoPath: join(__dirname, 'proto/cart_item_service.proto'),
           url: '0.0.0.0:7070',
         },
       },
@@ -25,7 +22,7 @@ import { AuthModule } from 'src/auth/auth.module';
         transport: Transport.GRPC,
         options: {
           package: 'cart',
-          protoPath: join(__dirname, 'proto/cart-service/cart_service.proto'),
+          protoPath: join(__dirname, 'proto/cart_service.proto'),
           url: '0.0.0.0:7070',
         },
       },

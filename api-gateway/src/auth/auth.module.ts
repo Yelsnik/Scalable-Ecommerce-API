@@ -12,7 +12,7 @@ import { AuthGuard } from './auth.guard';
         transport: Transport.GRPC,
         options: {
           package: 'pb',
-          protoPath: join(__dirname, 'proto/user-service/auth_service.proto'),
+          protoPath: join(__dirname, 'proto/auth_service.proto'),
           url: '0.0.0.0:9090',
         },
       },

@@ -11,9 +11,12 @@ import {
   ShopResponse,
   ShopServiceController,
   UpdateShopRequest,
-} from 'pb/shop_service';
+} from 'pb/product-service/shop_service';
 import { Observable } from 'rxjs';
-import { AllExceptionFilter, RpcExceptionFilters } from 'src/helpers/all-exception.filter';
+import {
+  AllExceptionFilter,
+  RpcExceptionFilters,
+} from 'src/helpers/all-exception.filter';
 
 @Controller('shop')
 @UseFilters(AllExceptionFilter, RpcExceptionFilters)

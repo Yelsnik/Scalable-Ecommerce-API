@@ -15,7 +15,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { File } from 'pb/file';
+import { File } from 'pb/product-service/file';
 import {
   deleteShopParam,
   getShopByIDParam,
@@ -30,7 +30,7 @@ import {
   GetShopByIdRequest,
   GetShopsByOwnerRequest,
   UpdateShopRequest,
-} from 'pb/shop_service';
+} from 'pb/product-service/shop_service';
 import { lastValueFrom } from 'rxjs';
 import {
   HttpExceptionFilter,
@@ -84,9 +84,7 @@ export class ShopController {
       image: fileData,
     };
 
-    const result = this.productService.createShop(req);
-
-    const shop = await lastValueFrom(result);
+    const shop = await this.productService.createShop(req);
 
     return response.status(201).json({
       message: 'success',

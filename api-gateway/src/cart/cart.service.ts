@@ -11,8 +11,8 @@ import {
   RemoveCartTxRequest,
   RemoveCartTxResult,
   UpdateCartTxRequest,
-} from 'pb/cart_item_service';
-import { CartServiceClient } from 'pb/cart_service';
+} from 'pb/cart-service/cart_item_service';
+import { CartServiceClient } from 'pb/cart-service/cart_service';
 import { Observable } from 'rxjs';
 import {
   AddtoCartBodyDTO,

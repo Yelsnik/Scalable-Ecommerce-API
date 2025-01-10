@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { HTTP_CODE_METADATA } from '@nestjs/common/constants';
 import { json } from 'stream/consumers';
 
 export class GRPCToHTTPExceptions {
@@ -8,19 +9,30 @@ export class GRPCToHTTPExceptions {
 
   private handleGrpcError(exception: any, response: any) {
     if (exception) {
-      const code = this.mapGrpcCodeToHttpStatus(exception.code);
+      if (exception.code) {
+        const code = this.mapGrpcCodeToHttpStatus(exception.code);
 
-      response.status(code).json({
-        statusCode: code,
+        return response.status(code).json({
+          statusCode: code,
+          message: exception.details,
+          stack: exception.stack,
+          // cause: exception.cause,
+          timestamp: new Date().toISOString(),
+          // path: request.url,
+        });
+      }
+
+      return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: exception.details,
-        //stack: exception.stack,
+        stack: exception.stack,
         // cause: exception.cause,
         timestamp: new Date().toISOString(),
         // path: request.url,
       });
     } else if (exception instanceof TypeError) {
       console.log(exception.name);
-      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: exception.message,
         stack: exception.stack,
@@ -30,7 +42,7 @@ export class GRPCToHTTPExceptions {
       });
     } else if (exception instanceof SyntaxError) {
       console.log(exception.name);
-      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: exception.message,
         stack: exception.stack,
@@ -39,7 +51,7 @@ export class GRPCToHTTPExceptions {
         // path: request.url,
       });
     } else {
-      response.status(exception.code).json({
+      return response.status(exception.code).json({
         statusCode: exception.code,
         message: exception.message,
         //stack: exception.stack,

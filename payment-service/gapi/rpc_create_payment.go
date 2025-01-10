@@ -74,11 +74,11 @@ func (server *Server) CreatePayment(ctx context.Context, req *payment.CreatePaym
 		ApplicationFeeAmount: stripe.Int64(int64(platformFee)),
 
 		Metadata: map[string]string{
-			"seller_id":        sellerAcc.UserId,
-			"cart_item_id":     cartItem.Id,
-			"buyer_id":         req.GetUserId(),
-			"delivery_address": req.GetDeliveryAddress(),
-			"country":          req.GetCountry(),
+			"sellerId":        sellerAcc.UserId,
+			"cartitemId":      cartItem.Id,
+			"buyerId":         req.GetUserId(),
+			"deliveryAddress": req.GetDeliveryAddress(),
+			"country":         req.GetCountry(),
 		},
 	}
 	params.SetIdempotencyKey(uuid.New().String())

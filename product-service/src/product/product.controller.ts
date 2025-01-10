@@ -1,25 +1,25 @@
 import { Controller, UseFilters } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { ProductService } from './product.service';
-import {
-  CreateProductRequest,
-  DeleteProductRequest,
-  EmptyRes,
-  GetProductByIdRequest,
-  GetProductsByShopRequest,
-  GetProductsByShopResponse,
-  ProductResponse,
-  ProductServiceController,
-  UpdateProductRequest,
-} from 'pb/product_service';
 import { Observable } from 'rxjs';
 import {
   AllExceptionFilter,
   RpcExceptionFilters,
 } from 'src/helpers/all-exception.filter';
+import {
+  ProductServiceController,
+  CreateProductRequest,
+  ProductResponse,
+  GetProductByIdRequest,
+  GetProductsByShopResponse,
+  UpdateProductRequest,
+  DeleteProductRequest,
+  EmptyRes,
+  ProductsByShopRequest,
+} from 'pb/product-service/product_service';
 
 @Controller('product')
-@UseFilters(AllExceptionFilter, RpcExceptionFilters)
+//@UseFilters(AllExceptionFilter, RpcExceptionFilters)
 export class ProductController implements ProductServiceController {
   constructor(private readonly productService: ProductService) {}
 
@@ -34,16 +34,18 @@ export class ProductController implements ProductServiceController {
   getProductById(
     request: GetProductByIdRequest,
   ): Promise<ProductResponse> | Observable<ProductResponse> | ProductResponse {
+    console.log(request);
     return this.productService.GetProductByID(request);
   }
 
   @GrpcMethod('ProductService', 'GetProductsByShop')
   getProductsByShop(
-    request: GetProductsByShopRequest,
+    request: ProductsByShopRequest,
   ):
     | Promise<GetProductsByShopResponse>
     | Observable<GetProductsByShopResponse>
     | GetProductsByShopResponse {
+    console.log(request);
     return this.productService.GetProductsByShop(request);
   }
 

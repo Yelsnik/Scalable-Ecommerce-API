@@ -56,6 +56,15 @@ export class AllExceptionFilter implements RpcExceptionFilter {
       };
     }
 
+    if (exception instanceof SyntaxError) {
+      console.log(exception);
+      return {
+        code: 3,
+        message: 'Type error occurred',
+        details: exception.message,
+      };
+    }
+
     // Handle MongoDB Duplicate Key Errors
     if (exception.code === 11000) {
       console.log(exception.name);

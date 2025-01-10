@@ -4,10 +4,13 @@ import {
   Delete,
   Get,
   HttpStatus,
+  InternalServerErrorException,
   Param,
   ParseFilePipeBuilder,
   Patch,
   Post,
+  Query,
+  Req,
   Res,
   UploadedFile,
   UseFilters,
@@ -26,7 +29,7 @@ import {
   GetProductByIdRequest,
   GetProductsByShopRequest,
   UpdateProductRequest,
-} from 'pb/product_service';
+} from 'pb/product-service/product_service';
 import {
   addProductDTO,
   addProductParamsDTO,
@@ -35,10 +38,12 @@ import {
 } from './dto/product.dto';
 import { lastValueFrom } from 'rxjs';
 import { AuthGuard } from 'src/auth/auth.guard';
+//import { Any } from 'pb/google/protobuf/any';
+//import { AnyFieldType } from 'google-protobuf';
 
 @Controller({ path: 'product', version: '1' })
-@UseGuards(AuthGuard)
 @UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
+@UseGuards(AuthGuard)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
@@ -80,9 +85,7 @@ export class ProductController {
       isFeatured: body.isfeatured,
     };
 
-    const res = this.productService.addProduct(request);
-
-    const product = await lastValueFrom(res);
+    const product = await this.productService.addProduct(request);
 
     response.status(201).json({
       message: 'success',
@@ -91,14 +94,13 @@ export class ProductController {
   }
 
   @Get(':id')
+  @UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
   async getProductById(@Param() params: any, @Res() response: any) {
     const request: GetProductByIdRequest = {
       id: params.id,
     };
 
-    const res = this.productService.getProductByID(request);
-
-    const product = await lastValueFrom(res);
+    const product = await this.productService.getProductByID(request);
 
     response.status(200).json({
       message: 'success',
@@ -107,9 +109,19 @@ export class ProductController {
   }
 
   @Get('shop/:id')
-  async getProductsByShop(@Param() params: any, @Res() response: any) {
+  @UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
+  async getProductsByShop(
+    @Param() params: any,
+    @Query() query: any,
+    @Req() req: any,
+    @Res() response: any,
+  ) {
+    const queryString = JSON.stringify(query);
+    console.log(query, queryString);
+
     const request: GetProductsByShopRequest = {
       id: params.id,
+      queryString: 'queryString',
     };
 
     const res = this.productService.getProductsByShop(request);
@@ -123,6 +135,7 @@ export class ProductController {
   }
 
   @Patch(':id')
+  @UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
   async updateProduct(
     @Param() params: updateProductParamsDTO,
     @Body() body: updateProductBodyDTO,
@@ -152,6 +165,7 @@ export class ProductController {
   }
 
   @Delete()
+  @UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
   async deleteProduct(@Param() params: any, @Res() response: any) {
     const request: DeleteProductRequest = {
       id: params.id,

@@ -9,6 +9,7 @@ import (
 
 type Store interface {
 	Querier
+	CreateOrderTx(ctx context.Context, arg OrderTxParams) (OrderTxResult, error)
 }
 
 type SQLStore struct {

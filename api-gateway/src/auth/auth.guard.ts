@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 import { lastValueFrom, Observable } from 'rxjs';
 import { AuthService } from './auth.service';
-import { GetUserByIdRequest, VerifyTokenRequest } from 'pb/auth_service';
+import {
+  GetUserByIdRequest,
+  VerifyTokenRequest,
+} from 'pb/user-service/auth_service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

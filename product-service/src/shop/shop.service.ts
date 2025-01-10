@@ -12,7 +12,7 @@ import {
   UpdateShopRequest,
   DeleteShopRequest,
   Empty,
-} from 'pb/shop_service';
+} from 'pb/product-service/shop_service';
 import { GridFsService } from 'src/grid-fs/grid-fs.service';
 import {
   GrpcAbortedException,

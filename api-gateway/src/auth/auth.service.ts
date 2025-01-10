@@ -7,7 +7,7 @@ import {
   GetUserByIdResponse,
   VerifyTokenRequest,
   VerifyTokenResponse,
-} from 'pb/auth_service';
+} from 'pb/user-service/auth_service';
 import { Observable } from 'rxjs';
 
 @Injectable()

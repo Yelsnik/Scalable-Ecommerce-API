@@ -20,6 +20,7 @@ type OrderTxParams struct {
 	UserName        string  `json:"user_name"`
 	BuyerID         string  `json:"buyer_id"`
 	SellerID        string  `json:"seller_id"`
+	CartItemId      string  `json:"cart_item_id"`
 	TotalPrice      float64 `json:"total_price"`
 	DeliveryAddress string  `json:"delivery_address"`
 	Country         string  `json:"country"`
@@ -27,14 +28,14 @@ type OrderTxParams struct {
 	OrderStatus     string  `json:"order_status"`
 }
 
-func (store *SQLStore) CreateOrderTx(ctx context.Context, cartItemID string, arg OrderTxParams) (OrderTxResult, error) {
+func (store *SQLStore) CreateOrderTx(ctx context.Context, arg OrderTxParams) (OrderTxResult, error) {
 	var result OrderTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
 		// get cart item that has been paid for
-		result.CartItem, err = store.client.GetCartItem(ctx, cartItemID)
+		result.CartItem, err = store.client.GetCartItem(ctx, arg.CartItemId)
 		if err != nil {
 			return err
 		}
@@ -86,7 +87,7 @@ func (store *SQLStore) CreateOrderTx(ctx context.Context, cartItemID string, arg
 		})
 
 		// remove the cart item
-		result.Cart, err = store.client.RemoveCartTx(ctx, cartItemID)
+		result.Cart, err = store.client.RemoveCartTx(ctx, arg.CartItemId)
 		if err != nil {
 			return err
 		}

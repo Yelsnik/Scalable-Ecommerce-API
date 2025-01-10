@@ -1,3 +1,4 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import {
@@ -5,9 +6,10 @@ import {
   DeleteProductRequest,
   GetProductByIdRequest,
   GetProductsByShopRequest,
+  ProductResponse,
   ProductServiceClient,
   UpdateProductRequest,
-} from 'pb/product_service';
+} from 'pb/product-service/product_service';
 import {
   CreateShopRequest,
   DeleteShopRequest,
@@ -17,8 +19,9 @@ import {
   ShopResponse,
   ShopServiceClient,
   UpdateShopRequest,
-} from 'pb/shop_service';
-import { Observable } from 'rxjs';
+} from 'pb/product-service/shop_service';
+import { lastValueFrom, Observable } from 'rxjs';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ProductService implements OnModuleInit {
@@ -28,6 +31,7 @@ export class ProductService implements OnModuleInit {
   constructor(
     @Inject('PRODUCT_SERVICE') private productClient: ClientGrpc,
     @Inject('SHOP_SERVICE') private shopClient: ClientGrpc,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   onModuleInit() {
@@ -45,9 +49,14 @@ export class ProductService implements OnModuleInit {
    * Update shop by id
    * Delete shop
    */
-  createShop(request: CreateShopRequest): Observable<ShopResponse> {
+  async createShop(request: CreateShopRequest) {
     const res = this.shopService.createShop(request);
-    return res;
+
+    const shop = await lastValueFrom(res);
+
+    const cachedData = await this.cacheManager.set(shop.shop.id, shop);
+
+    return cachedData;
   }
 
   getShopById(request: GetShopByIdRequest): Observable<ShopResponse> {
@@ -80,12 +89,30 @@ export class ProductService implements OnModuleInit {
    * Delete product
    */
 
-  addProduct(request: CreateProductRequest) {
-    return this.productService.addProduct(request);
+  async addProduct(request: CreateProductRequest) {
+    const res = this.productService.addProduct(request);
+
+    const product = await lastValueFrom(res);
+
+    const cachedData = await this.cacheManager.set(product.product.id, product);
+
+    return cachedData;
   }
 
-  getProductByID(request: GetProductByIdRequest) {
-    return this.productService.getProductById(request);
+  async getProductByID(request: GetProductByIdRequest) {
+    const res = this.productService.getProductById(request);
+
+    const product = await lastValueFrom(res);
+
+    const cachedData = await this.cacheManager.get<ProductResponse>(
+      product.product.id,
+    );
+
+    if (!cachedData) {
+      return product;
+    }
+
+    return cachedData;
   }
 
   getProductsByShop(request: GetProductsByShopRequest) {

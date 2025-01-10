@@ -20,6 +20,13 @@ func ValidateString(value string, minLength int, maxLength int) error {
 	return nil
 }
 
+func ValidateByte(data []byte) error {
+	if len(data) == 0 {
+		return fmt.Errorf("byte slice is empty")
+	}
+	return nil
+}
+
 func ValidateBool(b *bool) error {
 	if b == nil {
 		return fmt.Errorf("bool is not set")
