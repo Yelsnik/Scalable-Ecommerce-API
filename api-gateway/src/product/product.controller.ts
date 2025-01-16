@@ -109,7 +109,7 @@ export class ProductController {
   }
 
   @Get('shop/:id')
-  @UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
+  //@UseFilters(RpcToHttpExceptionFilter, HttpExceptionFilter)
   async getProductsByShop(
     @Param() params: any,
     @Query() query: any,
@@ -121,7 +121,7 @@ export class ProductController {
 
     const request: GetProductsByShopRequest = {
       id: params.id,
-      queryString: 'queryString',
+      queryString: queryString,
     };
 
     const res = this.productService.getProductsByShop(request);

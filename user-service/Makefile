@@ -32,4 +32,10 @@ proto:
 	--grpc-gateway_out=pb  --grpc-gateway_opt paths=source_relative \
     proto/*.proto
 
+proto-notification:
+	rm -f notification/*.go
+	protoc --proto_path=proto --go_out=notification --go_opt=paths=source_relative \
+    --go-grpc_out=notification --go-grpc_opt=paths=source_relative \
+    proto/notification/*.proto
+
 .PHONY: postgres createdb dropdb migrateup new_migration sqlc server evans proto

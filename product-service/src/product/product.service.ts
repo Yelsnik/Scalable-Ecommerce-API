@@ -127,10 +127,10 @@ export class ProductService {
     let features: ApiFeatures;
 
     if (request.queryString) {
-      //queryString = JSON.parse(request.queryString);
+      queryString = JSON.parse(request.queryString);
       features = new ApiFeatures(
         this.productModel.find({ shop: request.id }),
-        {},
+        queryString,
       )
         .filter()
         .sort()
@@ -148,8 +148,7 @@ export class ProductService {
     }
 
     const products = await features.query;
-
-    console.log(request);
+    console.log(products);
 
     if (!products) {
       throw new GrpcNotFoundException('Products not found');

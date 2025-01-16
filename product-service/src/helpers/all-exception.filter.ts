@@ -57,7 +57,7 @@ export class AllExceptionFilter implements RpcExceptionFilter {
     }
 
     if (exception instanceof SyntaxError) {
-      console.log(exception);
+      console.log(exception.name);
       return {
         code: 3,
         message: 'Type error occurred',

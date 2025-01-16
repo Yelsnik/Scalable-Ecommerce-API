@@ -3,7 +3,9 @@ package gapi
 import (
 	"fmt"
 
+	"user-service/client"
 	db "user-service/db/sqlc"
+	"user-service/worker"
 
 	"user-service/pb"
 	"user-service/token"
@@ -17,10 +19,12 @@ type Server struct {
 	config     util.Config
 	store      db.Store
 	tokenMaker token.Maker
+	rabbitmq   worker.Amqp
+	client     *client.Client
 }
 
 // creates a new gRPC server
-func NewServer(config util.Config, store db.Store) (*Server, error) {
+func NewServer(config util.Config, store db.Store, rabbitmq worker.Amqp, client *client.Client) (*Server, error) {
 
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
@@ -31,6 +35,8 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 		config:     config,
 		store:      store,
 		tokenMaker: tokenMaker,
+		rabbitmq:   rabbitmq,
+		client:     client,
 	}
 
 	return server, nil

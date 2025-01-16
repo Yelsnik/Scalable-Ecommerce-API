@@ -36,10 +36,11 @@ type StripeAccount struct {
 }
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Role      string    `json:"role"`
-	Password  string    `json:"password"`
-	CreatedAt time.Time `json:"created_at"`
+	ID              uuid.UUID `json:"id"`
+	Name            string    `json:"name"`
+	Email           string    `json:"email"`
+	Role            string    `json:"role"`
+	IsEmailVerified bool      `json:"is_email_verified"`
+	Password        string    `json:"password"`
+	CreatedAt       time.Time `json:"created_at"`
 }

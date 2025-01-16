@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package notification;
+
+option go_package = "notification-service/notification";
+
+message SendEmailRequest {
+    string email = 1;
+    string user_name = 2;
+    string user_id = 3;
+}
+
+
+message SendEmailResponse {
+    string message = 1;
+}
+
+message VerifyEmailRequest {
+    string email_id = 1;
+    string secret_code = 2;
+}
+
+message VerifyEmailResponse {
+    bool is_verified = 1;
+}
+
+service NotificationService {
+    rpc SendEmail(SendEmailRequest) returns (SendEmailResponse){}
+    rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse){}
+} 

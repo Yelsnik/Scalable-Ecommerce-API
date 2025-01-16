@@ -5,6 +5,9 @@ import (
 	db "user-service/db/sqlc"
 	"user-service/pb"
 	"user-service/util"
+	"user-service/worker"
+
+	"user-service/notification/notification"
 
 	"github.com/lib/pq"
 	"google.golang.org/grpc/codes"
@@ -18,14 +21,33 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		return nil, status.Errorf(codes.Internal, "failed to hash password: %s", err)
 	}
 
-	arg := db.CreateUserParams{
-		Name:     req.GetName(),
-		Email:    req.GetEmail(),
-		Role:     req.GetRole(),
-		Password: hashedPassword,
+	arg := db.CreateUserTxParams{
+		CreateUserParams: db.CreateUserParams{
+			Name:     req.GetName(),
+			Email:    req.GetEmail(),
+			Role:     req.GetRole(),
+			Password: hashedPassword,
+		},
+		AfterCreate: func(user db.User) error {
+			payload := struct {
+				Email string
+			}{
+				Email: user.Email,
+			}
+
+			arg := &notification.SendEmailRequest{
+				Email:    user.Email,
+				UserName: user.Name,
+				UserId:   user.ID.String(),
+			}
+
+			err := server.rabbitmq.Publish(worker.TaskSendVerifyEmail, arg, payload, ctx)
+
+			return err
+		},
 	}
 
-	user, err := server.store.CreateUser(ctx, arg)
+	result, err := server.store.CreateUserTx(ctx, arg)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code.Name() {
@@ -33,11 +55,11 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 				return nil, status.Errorf(codes.AlreadyExists, "user already exists: %s", err)
 			}
 		}
-		return nil, status.Errorf(codes.Internal, "failed to create user: %s", err)
+		return nil, status.Errorf(codes.Internal, "failed to create user and send email: %s", err)
 	}
 
 	rsp := &pb.CreateUserResponse{
-		User: convertUser(user),
+		User: convertUser(result.User),
 	}
 
 	return rsp, nil

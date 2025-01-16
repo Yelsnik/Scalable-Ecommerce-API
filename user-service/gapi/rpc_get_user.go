@@ -54,3 +54,41 @@ func validateGetUserByIDReq(req *pb.GetUserByIdRequest) (violations []*errdetail
 
 	return violations
 }
+
+func (server *Server) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailRequest) (*pb.GetUserByEmailResponse, error) {
+	violations := validateGetUserByEmailReq(req)
+	if violations != nil {
+		return nil, invalidArgumentError(violations)
+	}
+
+	user, err := server.store.GetUserByEmail(ctx, req.GetEmail())
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, status.Errorf(codes.NotFound, "user not found: %s", err)
+		}
+		return nil, status.Errorf(codes.Internal, "failed to find user: %s", err)
+	}
+
+	userId := util.ConvertUUIDToString(user.ID)
+
+	response := &pb.GetUserByEmailResponse{
+		User: &pb.User{
+			Id:        userId,
+			Name:      user.Name,
+			Email:     user.Email,
+			Role:      user.Role,
+			CreatedAt: timestamppb.New(user.CreatedAt),
+		},
+	}
+
+	return response, nil
+
+}
+
+func validateGetUserByEmailReq(req *pb.GetUserByEmailRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+	if err := val.ValidateString(req.GetEmail(), 5, 300); err != nil {
+		violations = append(violations, fielViolation("email", err))
+	}
+
+	return violations
+}

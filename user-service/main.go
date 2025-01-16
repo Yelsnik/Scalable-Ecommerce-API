@@ -7,15 +7,19 @@ import (
 	"net"
 	"net/http"
 
+	"user-service/client"
 	db "user-service/db/sqlc"
 	"user-service/gapi"
 	"user-service/pb"
 	"user-service/util"
+	"user-service/worker"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	_ "github.com/lib/pq"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/stripe/stripe-go/v81"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -33,14 +37,35 @@ func main() {
 		log.Fatal("could not connect", err)
 	}
 
+	// connect to rabbitmq
+	rabbitconn, err := amqp.Dial(config.RabbitMq)
+	if err != nil {
+		log.Fatal("could not connect to rabbitmq", err)
+	}
+
+	// create client grpc conn
+	notifConn, err := grpc.NewClient("0.0.0.0:4040", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("Failed to connect to auth service: %v", err)
+	}
+
+	// initialize the client
+	client := client.NewClient(notifConn)
+
+	// create new rabbitmq instance
+	rabbitmq, err := worker.NewAmqpTask(rabbitconn, "notification-service", client)
+	if err != nil {
+		log.Fatal("could not create new rabbitmq instance", err)
+	}
+
 	store := db.NewStore(conn)
-	go runGatewayServer(config, store)
-	runGrpcServer(config, store)
+	go runGatewayServer(config, store, rabbitmq, client)
+	runGrpcServer(config, store, rabbitmq, client)
 }
 
-func runGrpcServer(config util.Config, store db.Store) {
+func runGrpcServer(config util.Config, store db.Store, rabbitmq worker.Amqp, client *client.Client) {
 	// create a new server
-	server, err := gapi.NewServer(config, store)
+	server, err := gapi.NewServer(config, store, rabbitmq, client)
 	if err != nil {
 		log.Fatal("cannot create server:", err)
 	}
@@ -68,9 +93,9 @@ func runGrpcServer(config util.Config, store db.Store) {
 
 }
 
-func runGatewayServer(config util.Config, store db.Store) {
+func runGatewayServer(config util.Config, store db.Store, rabbitmq worker.Amqp, client *client.Client) {
 	// create a new server
-	server, err := gapi.NewServer(config, store)
+	server, err := gapi.NewServer(config, store, rabbitmq, client)
 	if err != nil {
 		log.Fatal("cannot create server:", err)
 	}

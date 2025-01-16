@@ -5,10 +5,10 @@ proto-product:
     proto/product-service/*.proto
 
 proto-user:
-	rm -f $(name)-service/user/user-service/*.go
+	rm -f $(name)-service/user/*.go
 	protoc --proto_path=proto --go_out=$(name)-service/user --go_opt=paths=source_relative \
     --go-grpc_out=$(name)-service/user --go-grpc_opt=paths=source_relative \
-    proto/user-service/*.proto
+    proto/auth_service.proto
 
 proto-cart:
 	rm -f $(name)-service/cart/*.go
@@ -21,6 +21,12 @@ proto-payment:
 	protoc --proto_path=proto --go_out=$(name)-service/payment --go_opt=paths=source_relative \
     --go-grpc_out=$(name)-service/payment --go-grpc_opt=paths=source_relative \
     proto/payment-service/*.proto
+
+proto-notification:
+	rm -f $(name)-service/notification/*.go
+	protoc --proto_path=proto --go_out=$(name)-service/notification --go_opt=paths=source_relative \
+    --go-grpc_out=$(name)-service/notification --go-grpc_opt=paths=source_relative \
+    proto/notification_service.proto
 
 protot-product:
 	protoc --plugin=./$(service)/node_modules/.bin/protoc-gen-ts_proto \

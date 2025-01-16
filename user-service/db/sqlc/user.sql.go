@@ -17,17 +17,19 @@ INSERT INTO users (
   name,
   email,
   role,
+  is_email_verified,
   password
 ) VALUES (
-  $1, $2, $3, $4
-) RETURNING id, name, email, role, password, created_at
+  $1, $2, $3, $4, $5
+) RETURNING id, name, email, role, is_email_verified, password, created_at
 `
 
 type CreateUserParams struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
-	Password string `json:"password"`
+	Name            string `json:"name"`
+	Email           string `json:"email"`
+	Role            string `json:"role"`
+	IsEmailVerified bool   `json:"is_email_verified"`
+	Password        string `json:"password"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -35,6 +37,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.Name,
 		arg.Email,
 		arg.Role,
+		arg.IsEmailVerified,
 		arg.Password,
 	)
 	var i User
@@ -43,6 +46,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Name,
 		&i.Email,
 		&i.Role,
+		&i.IsEmailVerified,
 		&i.Password,
 		&i.CreatedAt,
 	)
@@ -50,7 +54,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, name, email, role, password, created_at FROM users
+SELECT id, name, email, role, is_email_verified, password, created_at FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -62,6 +66,7 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Name,
 		&i.Email,
 		&i.Role,
+		&i.IsEmailVerified,
 		&i.Password,
 		&i.CreatedAt,
 	)
@@ -69,7 +74,7 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, name, email, role, password, created_at FROM users
+SELECT id, name, email, role, is_email_verified, password, created_at FROM users
 WHERE email = $1 LIMIT 1
 `
 
@@ -81,6 +86,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Name,
 		&i.Email,
 		&i.Role,
+		&i.IsEmailVerified,
 		&i.Password,
 		&i.CreatedAt,
 	)
@@ -91,22 +97,25 @@ const updateUser = `-- name: UpdateUser :one
 UPDATE users
 set name = COALESCE($1, name),
   email = COALESCE($2, email),
-  password = COALESCE($3, password)
-WHERE id = $4
-RETURNING id, name, email, role, password, created_at
+  is_email_verified = COALESCE($3, is_email_verified),
+  password = COALESCE($4, password)
+WHERE id = $5
+RETURNING id, name, email, role, is_email_verified, password, created_at
 `
 
 type UpdateUserParams struct {
-	Name     sql.NullString `json:"name"`
-	Email    sql.NullString `json:"email"`
-	Password sql.NullString `json:"password"`
-	ID       uuid.UUID      `json:"id"`
+	Name            sql.NullString `json:"name"`
+	Email           sql.NullString `json:"email"`
+	IsEmailVerified sql.NullBool   `json:"is_email_verified"`
+	Password        sql.NullString `json:"password"`
+	ID              uuid.UUID      `json:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, updateUser,
 		arg.Name,
 		arg.Email,
+		arg.IsEmailVerified,
 		arg.Password,
 		arg.ID,
 	)
@@ -116,6 +125,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.Name,
 		&i.Email,
 		&i.Role,
+		&i.IsEmailVerified,
 		&i.Password,
 		&i.CreatedAt,
 	)
