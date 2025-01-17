@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 )
 
 type CreateUserTxParams struct {
@@ -25,7 +24,7 @@ func (store *SQLStore) CreateUserTx(ctx context.Context, arg CreateUserTxParams)
 			return err
 		}
 
-		fmt.Println(result.User)
+		//fmt.Println(result.User)
 		err = arg.AfterCreate(result.User)
 		if err != nil {
 			return err

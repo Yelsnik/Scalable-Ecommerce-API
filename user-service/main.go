@@ -53,9 +53,14 @@ func main() {
 	client := client.NewClient(notifConn)
 
 	// create new rabbitmq instance
-	rabbitmq, err := worker.NewAmqpTask(rabbitconn, "notification-service", client)
+	rabbitmq, err := worker.NewAmqpTask(rabbitconn, "email-service", true, client)
 	if err != nil {
 		log.Fatal("could not create new rabbitmq instance", err)
+	}
+
+	err = rabbitmq.Consume(context.Background())
+	if err != nil {
+		log.Fatalf("failed to start or consume task: %s", err)
 	}
 
 	store := db.NewStore(conn)

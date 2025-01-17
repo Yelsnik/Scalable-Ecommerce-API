@@ -7,8 +7,6 @@ import (
 	"user-service/util"
 	"user-service/worker"
 
-	"user-service/notification/notification"
-
 	"github.com/lib/pq"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -30,18 +28,18 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		},
 		AfterCreate: func(user db.User) error {
 			payload := struct {
-				Email string
+				Email      string
+				UserName   string
+				Id         string
+				SecretCode string
 			}{
-				Email: user.Email,
+				Email:      user.Email,
+				UserName:   user.Name,
+				Id:         user.ID.String(),
+				SecretCode: util.RandomString(32),
 			}
 
-			arg := &notification.SendEmailRequest{
-				Email:    user.Email,
-				UserName: user.Name,
-				UserId:   user.ID.String(),
-			}
-
-			err := server.rabbitmq.Publish(worker.TaskSendVerifyEmail, arg, payload, ctx)
+			err := server.rabbitmq.Publish(worker.TaskSendVerifyEmail, payload, ctx)
 
 			return err
 		},
