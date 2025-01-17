@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	db "notification-service/db/sqlc"
 	"notification-service/mail"
+	"notification-service/util"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -15,12 +17,23 @@ const (
 )
 
 type ConsumeTask struct {
-	Ctx  context.Context
-	Task TaskSendVerifyEmailRequest
+	Ctx context.Context
 }
 
 type Task interface {
-	Consume(queuename string, arg ConsumeTask) error
+	Consume(queuename string, msgTTL int, dlx bool, arg ConsumeTask) error
+}
+
+type Payload struct {
+	Email      string
+	UserName   string
+	Id         string
+	SecretCode string
+}
+
+type Message struct {
+	Task    string
+	Payload Payload
 }
 
 type TaskConsumer struct {
@@ -42,7 +55,37 @@ func NewTaskConsumer(conn *amqp.Connection, store db.Store, mailer mail.EmailSen
 	}, nil
 }
 
-func (tc *TaskConsumer) Consume(queuename string, arg ConsumeTask) error {
+func (tc *TaskConsumer) Consume(queuename string, msgTTL int, dlx bool, arg ConsumeTask) error {
+	args := amqp.Table{}
+
+	if msgTTL > 0 {
+		args["x-message-ttl"] = msgTTL
+	}
+
+	if dlx {
+		args["x-dead-letter-exchange"] = queuename + "_dlx"
+	}
+
+	_, err := tc.channel.QueueDeclare(
+		queuename, // name
+		true,      // durable
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		args,      // arguments
+	)
+	if err != nil {
+		return fmt.Errorf("failed to declare a queue: %w", err)
+	}
+
+	err = tc.channel.Qos(
+		1,     // prefetch count
+		0,     // prefetch size
+		false, // global
+	)
+	if err != nil {
+		return fmt.Errorf("failed to set Qos: %w", err)
+	}
 
 	messages, err := tc.channel.Consume(
 		queuename,
@@ -58,26 +101,54 @@ func (tc *TaskConsumer) Consume(queuename string, arg ConsumeTask) error {
 		return err
 	}
 
-	//forever := make(chan bool)
+	// Graceful shutdown using context
+	ctx, cancel := context.WithCancel(arg.Ctx)
+	defer cancel()
 
 	go func() {
 		for message := range messages {
 			// Process each msg
-			var msg struct{}
-
+			var msg Message
 			err := json.Unmarshal(message.Body, &msg)
 			if err != nil {
-				return
+				log.Fatalf("fail to unmarshal message: %s", err)
+				continue
 			}
 
-			fmt.Println(msg)
-			message.Ack(false)
+			// process task send verify email
+			if msg.Task == TaskSendVerifyEmail {
+				id, err := util.ConvertStringToUUID(msg.Payload.Id)
+				if err != nil {
+					log.Fatalf("invalid payload id: %s", err)
+					continue
+				}
+
+				err = tc.TaskSendVerifyEmail(arg.Ctx, TaskSendVerifyEmailRequest{
+					Arg: db.CreateVerifyEmailParams{
+						UserID:     id,
+						Email:      msg.Payload.Email,
+						UserName:   msg.Payload.UserName,
+						SecretCode: msg.Payload.SecretCode,
+					},
+				})
+				if err != nil {
+					fmt.Printf("failed to handle message: %v", err)
+					message.Nack(false, false)
+					continue
+				}
+				message.Ack(false)
+			} else {
+				fmt.Printf("task does not exist: %v", msg.Task)
+				message.Nack(false, false)
+			}
+
 		}
 	}()
 
-	defer tc.channel.Close()
+	<-ctx.Done()
+	log.Println("shutting down consumer gracefully")
 
-	fmt.Println("Waiting for messages...")
+	defer tc.channel.Close()
 
 	return nil
 }
@@ -99,6 +170,8 @@ func (tc *TaskConsumer) TaskSendVerifyEmail(ctx context.Context, req TaskSendVer
 	Please <a href="%s">click here</a> to verify your email address, <br/>
 	`, verifyEmail.UserName, verifyUrl)
 	to := []string{verifyEmail.Email}
+
+	//fmt.Println(subject, content, to)
 
 	err = tc.mailer.SendEmail(subject, content, to, nil, nil, nil)
 	if err != nil {
