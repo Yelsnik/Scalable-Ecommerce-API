@@ -5,8 +5,10 @@ name: Run unit tests
 
 on:
   push:
-    branches: ["main"]
-    paths: ["cart-service/**"]
+    branches:
+      - "main"
+    paths:
+      - "cart-service/**"
 
 jobs:
   # detect changes
