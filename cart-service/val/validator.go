@@ -66,14 +66,4 @@ func ValidateEmail(value string) error {
 	return nil
 }
 
-func ValidateFullname(value string) error {
-	if err := ValidateString(value, 3, 100); err != nil {
-		return err
-	}
 
-	if !isValidFullname(value) {
-		return fmt.Errorf("must contain only letters or spaces")
-	}
-
-	return nil
-}
