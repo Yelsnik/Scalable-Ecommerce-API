@@ -12,27 +12,27 @@ This platform handles various aspects of an online store, such as product catalo
 
 This application contains core services which include;
 
-**User service**
+- **User service**
 
 The user service handles authentication, resetting passwords and user profile.
 
-**Product service**
+- **Product service**
 
 The product service takes care of products created by merchants as well as their shops.
 
-**Cart service**
+- **Cart service**
 
 The cart service allows the buyers or customers on the paltform to add items or products to cart, update cart and even remove products from cart.
 
-**Payment service**
+- **Payment service**
 
 The payment service handles transactions and payments by buyers for items in a shop. It enables buyers to be able to pay and order items from a shop.
 
-**Notification service**
+- **Notification service**
 
 The notification service is responsible for sending verification emails to the user. It also handles sending emails to the user updating them of an order.
 
-**API gateway**
+- **API gateway**
 
 The gateway which is built in NestJS is the entrypoint for the application.
 
@@ -55,6 +55,4 @@ The gateway which is built in NestJS is the entrypoint for the application.
 - To start services written in go, run `make server`
 - To start services written in NestJS, run `npm run service-name:dev`
 
-### Getting started with each service
-
-[Project Url](https://roadmap.sh/projects/scalable-ecommerce-platform)
+[Roadmap URL](https://roadmap.sh/projects/scalable-ecommerce-platform)
