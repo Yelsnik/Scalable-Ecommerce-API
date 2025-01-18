@@ -4,11 +4,9 @@ This platform handles various aspects of an online store, such as product catalo
 
 ## Table Of Contents
 
-- Microservices
-- Technologies used
-- APIs
-- Project Setup
-- Usage
+- [Microservices](#microservices)
+- [Technologies used](#technologies-used)
+- [Getting Started](#getting-started)
 
 ## Microservices
 
@@ -54,7 +52,9 @@ The gateway which is built in NestJS is the entrypoint for the application.
 3. Configure environment variables (e.g., database connections, RabbitMQ settings).
 4. Run the services:
 
-- to start services written in go, run `make server`
-- to start services written in NestJS, run `npm run service-name:dev`
+- To start services written in go, run `make server`
+- To start services written in NestJS, run `npm run service-name:dev`
+
+### Getting started with each service
 
 [Project Url](https://roadmap.sh/projects/scalable-ecommerce-platform)
