@@ -5,7 +5,12 @@ services:
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=mahanta
-      - POSTGRES_DB=e_commerce_user
+      - POSTGRES_DB=e_commerce_cart
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d e_commerce_cart"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   api:
     build:
@@ -16,6 +21,8 @@ services:
     environment:
       - DB_SOURCE=postgresql://root:mahanta@postgres:5432/e_commerce_cart?sslmode=disable
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
     entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
     command: ["/app/main"]

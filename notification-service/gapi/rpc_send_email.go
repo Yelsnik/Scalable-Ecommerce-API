@@ -2,7 +2,7 @@ package gapi
 
 import (
 	"context"
-	"notification-service/notification"
+	"notification-service/notification/notification"
 	"notification-service/worker"
 
 	"google.golang.org/grpc/codes"

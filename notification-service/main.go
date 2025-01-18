@@ -8,7 +8,7 @@ import (
 	db "notification-service/db/sqlc"
 	"notification-service/gapi"
 	"notification-service/mail"
-	"notification-service/notification"
+	"notification-service/notification/notification"
 	"notification-service/util"
 	"notification-service/worker"
 

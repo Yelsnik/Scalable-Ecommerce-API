@@ -1,22 +1,62 @@
 version: "3.9"
-services: 
+services:
   postgres:
     image: postgres:17-alpine
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=mahanta
       - POSTGRES_DB=e_commerce_user
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d e_commerce_user"]
+      interval: 5s
+      timeout: 1s
+      retries: 10
 
-  api: 
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASSWORD=guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+      - rabbitmq-log:/var/log/rabbitmq
+
+  api:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-    environment: 
+      - "9090:9090"
+    environment:
       - DB_SOURCE=postgresql://root:mahanta@postgres:5432/e_commerce_user?sslmode=disable
+      - RABBITMQ=amqp://guest:guest@rabbitmq:5672/
     depends_on:
-      - postgres
-    entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+    entrypoint:
+      [
+        "/app/wait-for.sh",
+        "postgres:5432",
+        "--",
+        "/app/wait-for.sh",
+        "rabbitmq:5672",
+        "--",
+        "/app/start.sh",
+      ]
     command: ["/app/main"]
 
+volumes:
+  rabbitmq-data:
+  rabbitmq-log:

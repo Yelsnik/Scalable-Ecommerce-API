@@ -2,7 +2,7 @@ package gapi
 
 import (
 	"notification-service/client"
-	"notification-service/notification"
+	"notification-service/notification/notification"
 	"notification-service/util"
 	"notification-service/worker"
 )

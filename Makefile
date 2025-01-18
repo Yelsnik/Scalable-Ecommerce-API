@@ -26,7 +26,7 @@ proto-notification:
 	rm -f $(name)-service/notification/*.go
 	protoc --proto_path=proto --go_out=$(name)-service/notification --go_opt=paths=source_relative \
     --go-grpc_out=$(name)-service/notification --go-grpc_opt=paths=source_relative \
-    proto/notification_service.proto
+    proto/notification/notification_service.proto
 
 protot-product:
 	protoc --plugin=./$(service)/node_modules/.bin/protoc-gen-ts_proto \

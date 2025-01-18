@@ -5,9 +5,7 @@ package notification;
 option go_package = "notification-service/notification";
 
 message SendEmailRequest {
-    string email = 1;
-    string user_name = 2;
-    string user_id = 3;
+   
 }
 
 message SendEmailResponse {
