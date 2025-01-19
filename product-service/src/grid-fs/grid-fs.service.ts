@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { MongoClient, GridFSBucket, GridFSBucketWriteStream } from 'mongodb';
 import { Readable } from 'stream';
 import { GridFsDto } from './dto/grid-fs.dto';
-import { File } from 'pb/product-service/file';
+import { File } from 'pb/file';
 
 @Injectable()
 export class GridFsService implements OnModuleInit {

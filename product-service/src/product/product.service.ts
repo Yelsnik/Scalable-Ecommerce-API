@@ -16,7 +16,7 @@ import {
   ProductResponse,
   ProductsByShopRequest,
   UpdateProductRequest,
-} from 'pb/product-service/product_service';
+} from 'pb/product_service';
 import { ApiFeatures } from 'src/helpers/apiFeatures';
 
 @Injectable()
@@ -148,13 +148,13 @@ export class ProductService {
     }
 
     const products = await features.query;
-    console.log(products);
+    // console.log(products);
 
     if (!products) {
       throw new GrpcNotFoundException('Products not found');
     }
 
-    const res: P[] = products.map((product) => {
+    const res: P[] = products.map((product: any) => {
       const res: P = {
         id: product.id,
         category: product.category,

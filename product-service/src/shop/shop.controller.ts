@@ -11,7 +11,7 @@ import {
   ShopResponse,
   ShopServiceController,
   UpdateShopRequest,
-} from 'pb/product-service/shop_service';
+} from 'pb/shop_service';
 import { Observable } from 'rxjs';
 import {
   AllExceptionFilter,
@@ -45,6 +45,7 @@ export class ShopController implements ShopServiceController {
     | Promise<GetShopsByOwnerResponse>
     | Observable<GetShopsByOwnerResponse>
     | GetShopsByOwnerResponse {
+    console.log(request);
     return this.shopService.getShopsByOwner(request);
   }
 

@@ -3,10 +3,6 @@ import { GrpcMethod } from '@nestjs/microservices';
 import { ProductService } from './product.service';
 import { Observable } from 'rxjs';
 import {
-  AllExceptionFilter,
-  RpcExceptionFilters,
-} from 'src/helpers/all-exception.filter';
-import {
   ProductServiceController,
   CreateProductRequest,
   ProductResponse,
@@ -16,7 +12,7 @@ import {
   DeleteProductRequest,
   EmptyRes,
   ProductsByShopRequest,
-} from 'pb/product-service/product_service';
+} from 'pb/product_service';
 
 @Controller('product')
 //@UseFilters(AllExceptionFilter, RpcExceptionFilters)

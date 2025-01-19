@@ -2,13 +2,13 @@
 // versions:
 //   protoc-gen-ts_proto  v2.6.0
 //   protoc               v5.29.2
-// source: product-service/product_service.proto
+// source: product_service.proto
 
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
-import { Timestamp } from "../google/protobuf/timestamp";
 import { File } from "./file";
+import { Timestamp } from "./google/protobuf/timestamp";
 
 export const protobufPackage = "product";
 

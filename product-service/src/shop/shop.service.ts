@@ -12,12 +12,13 @@ import {
   UpdateShopRequest,
   DeleteShopRequest,
   Empty,
-} from 'pb/product-service/shop_service';
+} from 'pb/shop_service';
 import { GridFsService } from 'src/grid-fs/grid-fs.service';
 import {
   GrpcAbortedException,
   GrpcNotFoundException,
 } from 'nestjs-grpc-exceptions';
+import { ApiFeatures } from 'src/helpers/apiFeatures';
 
 @Injectable()
 export class ShopService {
@@ -86,13 +87,38 @@ export class ShopService {
   async getShopsByOwner(
     request: GetShopsByOwnerRequest,
   ): Promise<GetShopsByOwnerResponse> {
-    const db = await this.shopModel.find({ shopOwner: request.id }).exec();
+    let queryString: string;
+    let features: ApiFeatures;
 
-    if (!db) {
+    if (request.queryString) {
+      queryString = JSON.parse(request.queryString);
+      features = new ApiFeatures(
+        this.shopModel.find({ shopOwner: request.id }),
+        queryString,
+      )
+        .filter()
+        .sort()
+        .limit()
+        .pagination();
+    } else {
+      features = new ApiFeatures(
+        this.shopModel.find({ shopOwner: request.id }),
+        {},
+      )
+        .filter()
+        .sort()
+        .limit()
+        .pagination();
+    }
+
+    const shops = await features.query;
+    console.log(typeof shops, shops);
+
+    if (!shops) {
       throw new GrpcNotFoundException('no shops belonging to you exist');
     }
 
-    const res: S[] = db.map((shop) => {
+    const res: S[] = shops.map((shop: any) => {
       let response: S = {
         id: shop.id,
         name: shop.name,
