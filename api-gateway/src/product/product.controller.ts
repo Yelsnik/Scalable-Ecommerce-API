@@ -27,9 +27,9 @@ import {
   CreateProductRequest,
   DeleteProductRequest,
   GetProductByIdRequest,
-  GetProductsByShopRequest,
+  ProductsByShopRequest,
   UpdateProductRequest,
-} from 'pb/product-service/product_service';
+} from 'pb/product/product_service';
 import {
   addProductDTO,
   addProductParamsDTO,
@@ -113,13 +113,12 @@ export class ProductController {
   async getProductsByShop(
     @Param() params: any,
     @Query() query: any,
-    @Req() req: any,
     @Res() response: any,
   ) {
     const queryString = JSON.stringify(query);
     console.log(query, queryString);
 
-    const request: GetProductsByShopRequest = {
+    const request: ProductsByShopRequest = {
       id: params.id,
       queryString: queryString,
     };

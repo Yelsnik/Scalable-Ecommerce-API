@@ -8,6 +8,7 @@ import {
   ParseFilePipeBuilder,
   Patch,
   Post,
+  Query,
   Res,
   UploadedFile,
   UseFilters,
@@ -15,7 +16,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { File } from 'pb/product-service/file';
+import { File } from 'pb/product/file';
 import {
   deleteShopParam,
   getShopByIDParam,
@@ -30,7 +31,7 @@ import {
   GetShopByIdRequest,
   GetShopsByOwnerRequest,
   UpdateShopRequest,
-} from 'pb/product-service/shop_service';
+} from 'pb/product/shop_service';
 import { lastValueFrom } from 'rxjs';
 import {
   HttpExceptionFilter,
@@ -108,10 +109,19 @@ export class ShopController {
   }
 
   @Get('user/:id')
-  async getShopsByOwner(@Param() params: any, @Res() response: any) {
+  async getShopsByOwner(
+    @Param() params: any,
+    @Query() query: any,
+    @Res() response: any,
+  ) {
+    const queryString = JSON.stringify(query);
+    console.log(query, queryString);
+
     const request: GetShopsByOwnerRequest = {
       id: params.id,
+      queryString: queryString,
     };
+
     const res = this.productService.getShopsByOwner(request);
 
     const shops = await lastValueFrom(res);

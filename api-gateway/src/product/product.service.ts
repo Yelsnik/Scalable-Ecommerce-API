@@ -5,11 +5,11 @@ import {
   CreateProductRequest,
   DeleteProductRequest,
   GetProductByIdRequest,
-  GetProductsByShopRequest,
+  ProductsByShopRequest,
   ProductResponse,
   ProductServiceClient,
   UpdateProductRequest,
-} from 'pb/product-service/product_service';
+} from 'pb/product/product_service';
 import {
   CreateShopRequest,
   DeleteShopRequest,
@@ -19,7 +19,7 @@ import {
   ShopResponse,
   ShopServiceClient,
   UpdateShopRequest,
-} from 'pb/product-service/shop_service';
+} from 'pb/product/shop_service';
 import { lastValueFrom, Observable } from 'rxjs';
 import { Cache } from 'cache-manager';
 
@@ -115,7 +115,7 @@ export class ProductService implements OnModuleInit {
     return cachedData;
   }
 
-  getProductsByShop(request: GetProductsByShopRequest) {
+  getProductsByShop(request: ProductsByShopRequest) {
     return this.productService.getProductsByShop(request);
   }
 

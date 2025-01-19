@@ -2,13 +2,13 @@
 // versions:
 //   protoc-gen-ts_proto  v2.6.0
 //   protoc               v5.29.2
-// source: product-service/product_service.proto
+// source: product_service.proto
 
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
-import { Timestamp } from "../google/protobuf/timestamp";
 import { File } from "./file";
+import { Timestamp } from "./google/protobuf/timestamp";
 
 export const protobufPackage = "product";
 
@@ -49,11 +49,12 @@ export interface ProductResponse {
 
 export interface GetProductByIdRequest {
   id: string;
+  user?: string | undefined;
 }
 
-export interface GetProductsByShopRequest {
-  id: string;
+export interface ProductsByShopRequest {
   queryString: string;
+  id: string;
 }
 
 export interface GetProductsByShopResponse {
@@ -88,7 +89,7 @@ export interface ProductServiceClient {
 
   getProductById(request: GetProductByIdRequest): Observable<ProductResponse>;
 
-  getProductsByShop(request: GetProductsByShopRequest): Observable<GetProductsByShopResponse>;
+  getProductsByShop(request: ProductsByShopRequest): Observable<GetProductsByShopResponse>;
 
   updateProduct(request: UpdateProductRequest): Observable<ProductResponse>;
 
@@ -103,7 +104,7 @@ export interface ProductServiceController {
   ): Promise<ProductResponse> | Observable<ProductResponse> | ProductResponse;
 
   getProductsByShop(
-    request: GetProductsByShopRequest,
+    request: ProductsByShopRequest,
   ): Promise<GetProductsByShopResponse> | Observable<GetProductsByShopResponse> | GetProductsByShopResponse;
 
   updateProduct(

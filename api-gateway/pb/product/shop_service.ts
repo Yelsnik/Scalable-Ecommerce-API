@@ -2,7 +2,7 @@
 // versions:
 //   protoc-gen-ts_proto  v2.6.0
 //   protoc               v5.29.2
-// source: product-service/shop_service.proto
+// source: shop_service.proto
 
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
@@ -28,6 +28,7 @@ export interface GetShopByIdRequest {
 
 export interface GetShopsByOwnerRequest {
   id: string;
+  queryString: string;
 }
 
 export interface GetShopsByOwnerResponse {
