@@ -25,9 +25,6 @@ export class shopBodyDTO {
 
   @IsString()
   description: string;
-
-  @IsString()
-  shopOwner: string;
 }
 
 export class getShopByIDParam {

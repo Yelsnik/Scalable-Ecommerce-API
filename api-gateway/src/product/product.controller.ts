@@ -123,9 +123,7 @@ export class ProductController {
       queryString: queryString,
     };
 
-    const res = this.productService.getProductsByShop(request);
-
-    const products = await lastValueFrom(res);
+    const products = await this.productService.getProductsByShop(request);
 
     response.status(200).json({
       message: 'success',
@@ -153,9 +151,7 @@ export class ProductController {
       isFeatured: body.isFeatured,
     };
 
-    const res = this.productService.updateProduct(request);
-
-    const product = await lastValueFrom(res);
+    const product = await this.productService.updateProduct(request);
 
     response.status(200).json({
       message: 'success',
@@ -170,9 +166,7 @@ export class ProductController {
       id: params.id,
     };
 
-    const res = this.productService.deleteProduct(request);
-
-    await lastValueFrom(res);
+    await this.productService.deleteProduct(request);
 
     response.status(200).json({
       message: 'success',

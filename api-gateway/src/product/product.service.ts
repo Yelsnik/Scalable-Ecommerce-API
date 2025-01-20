@@ -1,4 +1,4 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CACHE_MANAGER, CacheStore } from '@nestjs/cache-manager';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import {
@@ -9,6 +9,7 @@ import {
   ProductResponse,
   ProductServiceClient,
   UpdateProductRequest,
+  GetProductsByShopResponse,
 } from 'pb/product/product_service';
 import {
   CreateShopRequest,
@@ -54,30 +55,91 @@ export class ProductService implements OnModuleInit {
 
     const shop = await lastValueFrom(res);
 
-    const cachedData = await this.cacheManager.set(shop.shop.id, shop);
+    await this.cacheManager.set(shop.shop.id, shop, 60000);
+
+    const cachedData = await this.cacheManager.get<ShopResponse>(shop.shop.id);
+    console.log('cached_data', cachedData);
 
     return cachedData;
   }
 
-  getShopById(request: GetShopByIdRequest): Observable<ShopResponse> {
-    const shop = this.shopService.getShopById(request);
+  // get shop by id
+  async getShopById(request: GetShopByIdRequest) {
+    const cachedData = await this.cacheManager.get<ShopResponse>(request.id);
+
+    if (!cachedData) {
+      const res = this.shopService.getShopById(request);
+
+      const shop = await lastValueFrom(res);
+
+      await this.cacheManager.set(shop.shop.id, shop, 60000);
+
+      return shop;
+    }
+
+    return cachedData;
+  }
+
+  // get shops by owner
+  async getShopsByOwner(request: GetShopsByOwnerRequest) {
+    if (request.queryString === '{}') {
+      const cachedData = await this.cacheManager.get<GetShopsByOwnerResponse>(
+        request.id,
+      );
+
+      if (!cachedData) {
+        const res = this.shopService.getShopsByOwner(request);
+
+        const shops = await lastValueFrom(res);
+        await this.cacheManager.set(request.id, shops);
+
+        return shops;
+      }
+
+      return cachedData;
+    }
+
+    const cachedData = await this.cacheManager.get<GetShopsByOwnerResponse>(
+      request.queryString,
+    );
+
+    if (!cachedData) {
+      const res = this.shopService.getShopsByOwner(request);
+
+      const shops = await lastValueFrom(res);
+      await this.cacheManager.set(request.queryString, shops);
+
+      return shops;
+    }
+
+    return cachedData;
+  }
+
+  // update shop
+  async updateShop(request: UpdateShopRequest) {
+    const res = this.shopService.updateShop(request);
+
+    const shop = await lastValueFrom(res);
+
+    // get cahce if it exists
+    const cachedData = await this.cacheManager.get<ShopResponse>(request.id);
+    if (cachedData) {
+      await this.cacheManager.del(request.id);
+
+      await this.cacheManager.set(shop.shop.id, shop, 60000);
+    } else if (!cachedData) {
+      await this.cacheManager.set(shop.shop.id, shop, 60000);
+    }
+
     return shop;
   }
 
-  getShopsByOwner(
-    request: GetShopsByOwnerRequest,
-  ): Observable<GetShopsByOwnerResponse> {
-    const shops = this.shopService.getShopsByOwner(request);
-    return shops;
-  }
+  // delete shop
+  async deleteShop(request: DeleteShopRequest) {
+    await this.cacheManager.del(request.id);
+    const res = this.shopService.deleteShop(request);
 
-  updateShop(request: UpdateShopRequest): Observable<ShopResponse> {
-    const shop = this.shopService.updateShop(request);
-    return shop;
-  }
-
-  deleteShop(request: DeleteShopRequest) {
-    return this.shopService.deleteShop(request);
+    return await lastValueFrom(res);
   }
 
   /**
@@ -94,36 +156,95 @@ export class ProductService implements OnModuleInit {
 
     const product = await lastValueFrom(res);
 
-    const cachedData = await this.cacheManager.set(product.product.id, product);
-
-    return cachedData;
-  }
-
-  async getProductByID(request: GetProductByIdRequest) {
-    const res = this.productService.getProductById(request);
-
-    const product = await lastValueFrom(res);
+    await this.cacheManager.set(product.product.id, product, 60000);
 
     const cachedData = await this.cacheManager.get<ProductResponse>(
       product.product.id,
     );
+    console.log('2', cachedData);
+
+    return cachedData;
+  }
+
+  // get product by id
+  async getProductByID(request: GetProductByIdRequest) {
+    const cachedData = await this.cacheManager.get<ProductResponse>(request.id);
 
     if (!cachedData) {
+      const res = this.productService.getProductById(request);
+
+      const product = await lastValueFrom(res);
+
+      await this.cacheManager.set(product.product.id, product);
+
       return product;
     }
 
     return cachedData;
   }
 
-  getProductsByShop(request: ProductsByShopRequest) {
-    return this.productService.getProductsByShop(request);
+  // get products by shop
+  async getProductsByShop(request: ProductsByShopRequest) {
+    if (request.queryString === '{}') {
+      const cachedData = await this.cacheManager.get<GetProductsByShopResponse>(
+        request.id,
+      );
+      console.log(cachedData);
+
+      if (!cachedData) {
+        // get products from the product grpc service
+        const res = this.productService.getProductsByShop(request);
+        const products = await lastValueFrom(res);
+
+        // cache the product
+        await this.cacheManager.set(request.id, products, 60000);
+        return products;
+      }
+
+      return cachedData;
+    }
+
+    const cachedData = await this.cacheManager.get<GetProductsByShopResponse>(
+      request.queryString,
+    );
+    console.log(cachedData);
+
+    if (!cachedData) {
+      // get products from the product grpc service
+      const res = this.productService.getProductsByShop(request);
+      const products = await lastValueFrom(res);
+
+      // cache the products
+      await this.cacheManager.set(request.queryString, products, 60000);
+      return products;
+    }
+
+    return cachedData;
   }
 
-  updateProduct(request: UpdateProductRequest) {
-    return this.productService.updateProduct(request);
+  // update product
+  async updateProduct(request: UpdateProductRequest) {
+    const res = this.productService.updateProduct(request);
+
+    const product = await lastValueFrom(res);
+
+    const cachedData = await this.cacheManager.get<ProductResponse>(request.id);
+    if (cachedData) {
+      await this.cacheManager.del(request.id);
+
+      await this.cacheManager.set(product.product.id, product, 60000);
+    } else if (!cachedData) {
+      await this.cacheManager.set(product.product.id, product, 60000);
+    }
+
+    return product;
   }
 
-  deleteProduct(request: DeleteProductRequest) {
-    return this.productService.deleteProduct(request);
+  // delete product
+  async deleteProduct(request: DeleteProductRequest) {
+    await this.cacheManager.del(request.id);
+
+    const res = this.productService.deleteProduct(request);
+    return await lastValueFrom(res);
   }
 }

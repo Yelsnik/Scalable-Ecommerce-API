@@ -9,11 +9,16 @@ import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
-    CacheModule.register({
+    CacheModule.registerAsync({
       isGlobal: true,
-      store: redisStore,
-      host: 'localhost',
-      port: 6379,
+      useFactory: async () => ({
+        store: await redisStore({
+          socket: {
+            host: 'localhost',
+            port: 6379,
+          },
+        }),
+      }),
     }),
     ProductModule,
     AuthModule,

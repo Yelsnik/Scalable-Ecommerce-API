@@ -7,6 +7,7 @@ import { PRODUCT_PACKAGE_NAME as Product } from 'pb/product/product_service';
 import { ProductController } from './product.controller';
 import { ShopController } from './shop.controller';
 import { AuthModule } from 'src/auth/auth.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AuthModule } from 'src/auth/auth.module';
         },
       },
     ]),
+    CacheModule.register(),
     AuthModule,
   ],
   providers: [ProductService],

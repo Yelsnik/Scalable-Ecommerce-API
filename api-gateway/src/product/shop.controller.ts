@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   Res,
   UploadedFile,
   UseFilters,
@@ -67,6 +68,7 @@ export class ShopController {
     )
     file: Express.Multer.File,
     @Body() data: shopBodyDTO,
+    @Req() request: any,
     @Res() response: any,
   ) {
     console.log(file);
@@ -81,7 +83,7 @@ export class ShopController {
     const req: CreateShopRequest = {
       name: data.shopname,
       description: data.description,
-      shopOwner: data.shopOwner,
+      shopOwner: request.user.user.id,
       image: fileData,
     };
 
@@ -98,13 +100,11 @@ export class ShopController {
     const req: GetShopByIdRequest = {
       id: params.id,
     };
-    const shop = this.productService.getShopById(req);
-
-    const result = await lastValueFrom(shop);
+    const shop = await this.productService.getShopById(req);
 
     return response.status(200).json({
       message: 'success',
-      data: result,
+      data: shop,
     });
   }
 
@@ -122,9 +122,7 @@ export class ShopController {
       queryString: queryString,
     };
 
-    const res = this.productService.getShopsByOwner(request);
-
-    const shops = await lastValueFrom(res);
+    const shops = await this.productService.getShopsByOwner(request);
 
     return response.status(200).json({
       message: 'success',
@@ -144,8 +142,7 @@ export class ShopController {
       description: body.description,
     };
 
-    const res = this.productService.updateShop(request);
-    const shop = await lastValueFrom(res);
+    const shop = await this.productService.updateShop(request);
 
     return response.status(200).json({
       message: 'success',
@@ -159,9 +156,7 @@ export class ShopController {
       id: params.id,
     };
 
-    const res = this.productService.deleteShop(request);
-
-    await lastValueFrom(res);
+    await this.productService.deleteShop(request);
 
     return response.status(200).json({
       message: 'successfully deleted shop',
