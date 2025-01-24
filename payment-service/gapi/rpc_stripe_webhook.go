@@ -3,8 +3,10 @@ package gapi
 import (
 	"context"
 	"encoding/json"
+	"payment-service/cart/cart-service"
 	db "payment-service/db/sqlc"
 	"payment-service/payment/payment-service"
+	"payment-service/product/product-service"
 	"payment-service/val"
 
 	"github.com/stripe/stripe-go/v81"
@@ -52,7 +54,9 @@ func (server *Server) Webhook(ctx context.Context, req *payment.WebhookRequest) 
 	return &payment.WebhookResponse{}, nil
 }
 
+// handle payment if successful func
 func (server *Server) handlePaymentIfSuccesful(ctx context.Context, paymentIntent *stripe.PaymentIntent) (*payment.WebhookResponse, error) {
+	// get the customer
 	params := &stripe.CustomerParams{}
 
 	customer, err := customer.Get(paymentIntent.Customer.ID, params)
@@ -60,11 +64,13 @@ func (server *Server) handlePaymentIfSuccesful(ctx context.Context, paymentInten
 		return nil, err
 	}
 
+	// get user from db
 	user, err := server.client.GetUserByEmail(ctx, customer.Email)
 	if err != nil {
 		return nil, err
 	}
 
+	// create the order
 	arg := db.OrderTxParams{
 		PaymentIntent:   paymentIntent.ID,
 		UserName:        user.User.Name,
@@ -76,6 +82,21 @@ func (server *Server) handlePaymentIfSuccesful(ctx context.Context, paymentInten
 		Country:         paymentIntent.Metadata["country"],
 		PaymentStatus:   string(paymentIntent.Status),
 		OrderStatus:     "processing",
+		GetCartItem: func(ctx context.Context, cartItemId string) (*cart.CartItemResponse, error) {
+			response, err := server.client.GetCartItem(ctx, cartItemId)
+
+			return response, err
+		},
+		GetProductByID: func(ctx context.Context, productId string) (*product.ProductResponse, error) {
+			response, err := server.client.GetProductByID(ctx, productId)
+
+			return response, err
+		},
+		RemoveCartTx: func(ctx context.Context, cartItemId string) (*cart.RemoveCartTxResult, error) {
+			response, err := server.client.RemoveCartTx(ctx, cartItemId)
+
+			return response, err
+		},
 	}
 
 	result, err := server.store.CreateOrderTx(ctx, arg)
@@ -83,6 +104,7 @@ func (server *Server) handlePaymentIfSuccesful(ctx context.Context, paymentInten
 		return nil, err
 	}
 
+	// send the response
 	response := &payment.WebhookResponse{
 		Payment: &payment.Payment{
 			Id:        result.Payment.ID,
@@ -109,6 +131,7 @@ func (server *Server) handlePaymentIfSuccesful(ctx context.Context, paymentInten
 
 }
 
+// validator func for webhook req
 func validateWebhookRequest(req *payment.WebhookRequest) (violations []*errdetails.BadRequest_FieldViolation) {
 	if err := val.ValidateString(req.GetPayload(), 1, 100); err != nil {
 		violations = append(violations, fielViolation("payload", err))

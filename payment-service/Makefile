@@ -16,6 +16,9 @@ migratedown:
 new_migration:
 	migrate create -ext sql -dir db/migration -seq $(name)
 
+mock:
+	mockgen -package mockdb -destination db/mock/store.go payment-service/db/sqlc Store
+
 sqlc:
 	sqlc generate
 

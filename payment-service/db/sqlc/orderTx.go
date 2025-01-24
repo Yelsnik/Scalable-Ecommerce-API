@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"payment-service/cart/cart-service"
+	"payment-service/product/product-service"
 	"payment-service/util"
 )
 
@@ -26,6 +27,9 @@ type OrderTxParams struct {
 	Country         string  `json:"country"`
 	PaymentStatus   string  `json:"status"`
 	OrderStatus     string  `json:"order_status"`
+	GetCartItem     func(ctx context.Context, cartItemId string) (*cart.CartItemResponse, error)
+	GetProductByID  func(ctx context.Context, productId string) (*product.ProductResponse, error)
+	RemoveCartTx    func(ctx context.Context, cartItemId string) (*cart.RemoveCartTxResult, error)
 }
 
 func (store *SQLStore) CreateOrderTx(ctx context.Context, arg OrderTxParams) (OrderTxResult, error) {
@@ -35,7 +39,7 @@ func (store *SQLStore) CreateOrderTx(ctx context.Context, arg OrderTxParams) (Or
 		var err error
 
 		// get cart item that has been paid for
-		result.CartItem, err = store.client.GetCartItem(ctx, arg.CartItemId)
+		result.CartItem, err = arg.GetCartItem(ctx, arg.CartItemId)
 		if err != nil {
 			return err
 		}
@@ -72,7 +76,7 @@ func (store *SQLStore) CreateOrderTx(ctx context.Context, arg OrderTxParams) (Or
 		}
 
 		// get the product associated with the cart
-		product, err := store.client.GetProductByID(ctx, productId)
+		product, err := arg.GetProductByID(ctx, productId)
 		if err != nil {
 			return err
 		}
@@ -87,7 +91,7 @@ func (store *SQLStore) CreateOrderTx(ctx context.Context, arg OrderTxParams) (Or
 		})
 
 		// remove the cart item
-		result.Cart, err = store.client.RemoveCartTx(ctx, arg.CartItemId)
+		result.Cart, err = arg.RemoveCartTx(ctx, arg.CartItemId)
 		if err != nil {
 			return err
 		}

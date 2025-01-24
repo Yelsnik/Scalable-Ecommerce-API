@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"payment-service/client"
 )
 
 type Store interface {
@@ -14,8 +13,7 @@ type Store interface {
 
 type SQLStore struct {
 	*Queries
-	db     *sql.DB
-	client *client.Client
+	db *sql.DB
 }
 
 func NewStore(db *sql.DB) Store {
