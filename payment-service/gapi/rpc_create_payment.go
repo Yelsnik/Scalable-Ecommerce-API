@@ -2,7 +2,7 @@ package gapi
 
 import (
 	"context"
-	"database/sql"
+	"fmt"
 
 	db "payment-service/db/sqlc"
 	"payment-service/payment/payment-service"
@@ -11,8 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stripe/stripe-go/v81"
-	"github.com/stripe/stripe-go/v81/customer"
-	"github.com/stripe/stripe-go/v81/paymentintent"
+
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -26,30 +25,35 @@ func (server *Server) CreatePayment(ctx context.Context, req *payment.CreatePaym
 	}
 
 	// get or create the customer id
-	customerId, err := server.getOrCreateCustomer(ctx, req.GetUserId(), req.GetEmail(), req.GetPaymentId())
+	fmt.Println("get customer")
+	customerId, err := server.helpers.GetOrCreateCustomer(ctx, req.GetUserId(), req.GetEmail(), req.GetPaymentId())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get or create customer %s", err)
 	}
 
 	// get the cart item
+	fmt.Println("get cart")
 	cartItem, err := server.client.GetCartItem(ctx, req.GetCartItemId())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get cart item %s", err)
 	}
 
 	// get the product
+	fmt.Println("get product")
 	product, err := server.client.GetProductByID(ctx, cartItem.Product)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get product %s", err)
 	}
 
 	// get the shop
+	fmt.Println("get shop")
 	shop, err := server.client.GetShopByID(ctx, product.Product.Shop)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get shop %s", err)
 	}
 
 	// get the stripe seller account with the seller user id
+	fmt.Println("get stripe seller account")
 	sellerAcc, err := server.client.GetStripeSellerAccount(ctx, shop.Shop.ShopOwner)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "unable to make payment at this time %s", err)
@@ -88,12 +92,14 @@ func (server *Server) CreatePayment(ctx context.Context, req *payment.CreatePaym
 		params.SetupFutureUsage = stripe.String(string(stripe.PaymentIntentSetupFutureUsageOnSession))
 	}
 
-	pi, err := paymentintent.New(params)
+	fmt.Println("create new payment intent")
+	pi, err := server.stripe.NewPaymentIntent(params)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create payment intent %s", err)
 	}
 
 	// save payment in db
+	fmt.Println("save payment in the db")
 	id, err := util.ConvertStringToUUID(req.GetUserId())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid id %s", err)
@@ -156,48 +162,4 @@ func validateCreatePaymentRequest(req *payment.CreatePaymentRequest) (violations
 	}
 
 	return violations
-}
-
-func (server *Server) getOrCreateCustomer(ctx context.Context, userId, email, paymentId string) (string, error) {
-
-	var err error
-
-	id, err := util.ConvertStringToUUID(userId)
-	if err != nil {
-		return "", err
-	}
-
-	// get the customer id if exists
-	customerDB, err := server.store.GetStripeCustomerByUserId(ctx, id)
-	if err != nil {
-		// create a new customer if not exists
-		if err == sql.ErrNoRows {
-			params := &stripe.CustomerParams{
-				Email:         stripe.String(email),
-				PaymentMethod: stripe.String(paymentId),
-				Metadata: map[string]string{
-					"buyer_id": userId,
-				},
-			}
-
-			customer, err := customer.New(params)
-			if err != nil {
-				return "", err
-			}
-
-			_, err = server.store.CreateStripeCustomer(ctx, db.CreateStripeCustomerParams{
-				ID:     customer.ID,
-				UserID: id,
-			})
-			if err != nil {
-				return "", err
-			}
-
-			return customer.ID, nil
-		}
-
-		return "", err
-	}
-
-	return customerDB.ID, nil
 }

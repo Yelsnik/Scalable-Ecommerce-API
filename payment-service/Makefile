@@ -18,6 +18,10 @@ new_migration:
 
 mock:
 	mockgen -package mockdb -destination db/mock/store.go payment-service/db/sqlc Store
+	mockgen -package clientdb -destination client/mock/client.go payment-service/client ClientInterface
+	mockgen -package helpmck -destination gapi/helpers/mock/helper_mock.go payment-service/gapi/helpers Helper
+	mockgen -package stripemck -destination stripe/mock/stripe_mock.go payment-service/stripe Stripe
+
 
 sqlc:
 	sqlc generate

@@ -8,11 +8,13 @@ import (
 	"payment-service/client"
 	db "payment-service/db/sqlc"
 	"payment-service/gapi"
+	"payment-service/gapi/helpers"
 	"payment-service/payment/payment-service"
+	"payment-service/stripe"
 	"payment-service/util"
 
 	_ "github.com/lib/pq"
-	"github.com/stripe/stripe-go/v81"
+	str "github.com/stripe/stripe-go/v81"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
@@ -24,7 +26,7 @@ func main() {
 		log.Fatal("cannot load config:", err)
 	}
 
-	stripe.Key = config.StripeSecretKey
+	str.Key = config.StripeSecretKey
 
 	// connect to database
 	conn, err := sql.Open(config.DBDriver, config.DBSource)
@@ -60,13 +62,28 @@ func main() {
 	// Initialize the client
 	client := client.NewClient(productConn, shopConn, authConn, cartConn)
 
+	// initialize and inject helper functions for the server
+	helpers := helpers.NewHelpers()
+
+	// initialize and inject stripe interface
+	stripe := stripe.NewStripeClient()
+
 	store := db.NewStore(conn)
-	runGrpcServer(config, store, client)
+
+	grpcServerParams := gapi.NewGrpcServerParams{
+		Config:  config,
+		Store:   store,
+		Client:  client,
+		Helpers: helpers,
+		Stripe:  stripe,
+	}
+
+	runGrpcServer(grpcServerParams)
 }
 
-func runGrpcServer(config util.Config, store db.Store, c *client.Client) {
+func runGrpcServer(params gapi.NewGrpcServerParams) {
 	// create a new server
-	server, err := gapi.NewServer(config, store, c)
+	server, err := gapi.NewServer(params)
 	if err != nil {
 		log.Fatal("cannot create server:", err)
 	}
@@ -78,7 +95,7 @@ func runGrpcServer(config util.Config, store db.Store, c *client.Client) {
 
 	// start the server to listen to grpc
 	// requests on a specific port
-	listener, err := net.Listen("tcp", config.GRPCServerAddress)
+	listener, err := net.Listen("tcp", params.Config.GRPCServerAddress)
 	if err != nil {
 		log.Fatal("cannot create listener:", err)
 	}
