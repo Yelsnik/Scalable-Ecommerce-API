@@ -1,10 +1,11 @@
 package gapi
 
 import (
-	"notification-service/client"
-	"notification-service/notification/notification"
+	"notification-service/notification"
 	"notification-service/util"
 	"notification-service/worker"
+
+	"github.com/redis/go-redis/v9"
 )
 
 // serves gRPC requests for our banking service
@@ -12,16 +13,16 @@ type Server struct {
 	notification.UnimplementedNotificationServiceServer
 	config   util.Config
 	rabbitmq worker.Task
-	client   *client.Client
+	redis    *redis.Client
 }
 
 // creates a new gRPC server
-func NewServer(config util.Config, rabbitmq worker.Task, client *client.Client) (*Server, error) {
+func NewServer(config util.Config, rabbitmq worker.Task, redis *redis.Client) (*Server, error) {
 
 	server := &Server{
 		config:   config,
 		rabbitmq: rabbitmq,
-		client:   client,
+		redis:    redis,
 	}
 
 	return server, nil

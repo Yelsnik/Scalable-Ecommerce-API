@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package auction;
+
+import "google/protobuf/timestamp.proto";
+import "auction.proto";
+import "bid.proto";
+
+option go_package = "auction-service/auction";
+
+message CreateAuctionRequest{
+    string product_id = 1;
+    google.protobuf.Timestamp start_time = 2;
+    google.protobuf.Timestamp end_time = 3;
+    string user_id = 4;
+    float starting_price = 5;
+}
+
+message CreateAuctionResponse{
+    Auction auction = 1;
+}
+
+message PlaceBidRequest {
+    string auction_id = 1;
+    string bidder_id = 2;
+    float amount = 3;
+}
+
+message PlaceBidResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message GetBidsRequest {
+    string auction_id = 1;
+    string user_id = 2;
+}
+
+message GetBidsResponse {
+    Bid bid = 1;
+}
+
+message GetAuctionsRequest {}
+
+message GetAuctionsResponse {}
+
+message GetAuctionByIDRequest {}
+message GetAuctionByIDResponse {}
+
+service AuctionService {
+    rpc CreateAuction(CreateAuctionRequest) returns (CreateAuctionResponse) {}
+    rpc GetAuctionById(GetAuctionByIDRequest) returns (GetAuctionByIDResponse){}
+    rpc GetAuctions(GetAuctionsRequest) returns (GetAuctionsResponse){}
+    rpc PlaceBid(PlaceBidRequest) returns (PlaceBidResponse){}
+    rpc GetBids(GetBidsRequest) returns (stream GetBidsResponse){}
+}

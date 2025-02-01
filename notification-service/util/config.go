@@ -20,6 +20,7 @@ type Config struct {
 	PasswordResetTokenDuration time.Duration `mapstructure:"PASSWORD_RESET_TOKEN_DURATION"`
 	StripeSecretKey            string        `mapstructure:"STRIPE_SECRET_KEY"`
 	RabbitMq                   string        `mapstructure:"RABBITMQ"`
+	Redis                      string        `mapstructure:"REDIS"`
 	//PasswordResetTokenDuration time.Duration `mapstructure:"PASSWORD_RESET_TOKEN_DURATION"`
 }
 

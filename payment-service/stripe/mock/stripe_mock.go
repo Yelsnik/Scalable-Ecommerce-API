@@ -48,3 +48,18 @@ func (mr *MockStripeMockRecorder) NewPaymentIntent(arg0 interface{}) *gomock.Cal
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewPaymentIntent", reflect.TypeOf((*MockStripe)(nil).NewPaymentIntent), arg0)
 }
+
+// Webhook mocks base method.
+func (m *MockStripe) Webhook(arg0, arg1, arg2 string) (stripe.Event, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Webhook", arg0, arg1, arg2)
+	ret0, _ := ret[0].(stripe.Event)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Webhook indicates an expected call of Webhook.
+func (mr *MockStripeMockRecorder) Webhook(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Webhook", reflect.TypeOf((*MockStripe)(nil).Webhook), arg0, arg1, arg2)
+}

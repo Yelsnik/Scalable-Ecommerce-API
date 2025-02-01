@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	TaskSendVerifyEmail = "task:sendVerifyEmail"
+	TaskSendBidUpdates = "task:SendBidUpdates"
+	QueueBid           = "biddingQueue"
 )
 
 type Amqp interface {
@@ -76,7 +77,7 @@ func (a *AmqpTask) Publish(task string, v any, ctx context.Context) error {
 	err = a.ch.PublishWithContext(context.Background(), "", a.queue.Name, false, false, amqp091.Publishing{
 		DeliveryMode: amqp091.Persistent,
 		ContentType:  "text/plain",
-		MessageId:    TaskSendVerifyEmail,
+		MessageId:    TaskSendBidUpdates,
 		Body:         bytes,
 	})
 	if err != nil {

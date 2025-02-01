@@ -23,6 +23,7 @@ message GetShopByIdRequest {
 
 message GetShopsByOwnerRequest {
     string id = 1;
+    string query_string = 2;
 }
 
 message GetShopsByOwnerResponse {

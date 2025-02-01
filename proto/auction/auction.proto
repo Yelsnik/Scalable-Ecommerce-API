@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package auction;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "auction-service/auction";
+
+message Auction {
+    string id = 1;
+    string product_id = 2;
+    string user_id = 3;
+    google.protobuf.Timestamp start_time = 4;
+    google.protobuf.Timestamp end_time = 5;
+    float starting_price = 6;
+    float current_price = 7;
+    string status = 8;
+    string winner_id = 9;
+}

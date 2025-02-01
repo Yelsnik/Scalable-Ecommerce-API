@@ -29,14 +29,14 @@ INSERT INTO auctions (
 `
 
 type CreateAuctionParams struct {
-	ProductID     string    `json:"product_id"`
-	UserID        uuid.UUID `json:"user_id"`
-	StartTime     time.Time `json:"start_time"`
-	EndTime       time.Time `json:"end_time"`
-	StartingPrice float64   `json:"starting_price"`
-	CurrentPrice  float64   `json:"current_price"`
-	Status        string    `json:"status"`
-	WinnerID      uuid.UUID `json:"winner_id"`
+	ProductID     string      `json:"product_id"`
+	UserID        uuid.UUID   `json:"user_id"`
+	StartTime     time.Time   `json:"start_time"`
+	EndTime       time.Time   `json:"end_time"`
+	StartingPrice float64     `json:"starting_price"`
+	CurrentPrice  float64     `json:"current_price"`
+	Status        string      `json:"status"`
+	WinnerID      pgtype.UUID `json:"winner_id"`
 }
 
 func (q *Queries) CreateAuction(ctx context.Context, arg CreateAuctionParams) (Auction, error) {

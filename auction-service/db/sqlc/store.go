@@ -9,6 +9,7 @@ import (
 
 type Store interface {
 	Querier
+	PlaceBidTx(ctx context.Context, arg PlaceBidTxParams) (PlaceBidTxResult, error)
 }
 
 type SQLStore struct {

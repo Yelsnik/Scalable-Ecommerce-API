@@ -8,6 +8,7 @@ type Config struct {
 	DBSource          string `mapstructure:"DB_SOURCE"`
 	GRPCServerAddress string `mapstructure:"GRPC_SERVER_ADDRESS"`
 	RabbitMq          string `mapstructure:"RABBITMQ"`
+	Redis             string `mapstructure:"REDIS"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

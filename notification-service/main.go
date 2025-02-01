@@ -1,21 +1,22 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"net"
-	"notification-service/client"
 	db "notification-service/db/sqlc"
 	"notification-service/gapi"
 	"notification-service/mail"
-	"notification-service/notification/notification"
+	"notification-service/notification"
 	"notification-service/util"
 	"notification-service/worker"
 
 	_ "github.com/lib/pq"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -36,6 +37,19 @@ func main() {
 	// initialize mailer
 	mailer := mail.NewGmailSender(config.EmailSenderName, config.EmailSenderAddress, config.EmailSenderPassword)
 
+	// connect to redis
+	opts, err := redis.ParseURL(config.Redis)
+	if err != nil {
+		log.Fatal("could not connect to redis", err)
+	}
+
+	redisClient := redis.NewClient(opts)
+	pong, err := redisClient.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatal("Error connecting to Redis:", err)
+	}
+	fmt.Println("connected to redis successfully", pong)
+
 	// connect to rabbitmq
 	rabbitconn, err := amqp.Dial(config.RabbitMq)
 	if err != nil {
@@ -43,26 +57,17 @@ func main() {
 	}
 
 	// create new rabbitmq instance
-	rabbitmq, err := worker.NewTaskConsumer(rabbitconn, store, mailer)
+	rabbitmq, err := worker.NewTaskConsumer(rabbitconn, store, mailer, redisClient)
 	if err != nil {
 		log.Fatal("could not create new rabbitmq instance", err)
 	}
 
-	// create client grpc conn
-	authConn, err := grpc.NewClient("0.0.0.0:9090", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalf("Failed to connect to auth service: %v", err)
-	}
-
-	// Initialize the client
-	client := client.NewClient(authConn)
-
-	runGrpcServer(config, rabbitmq, client)
+	runGrpcServer(config, rabbitmq, redisClient)
 }
 
-func runGrpcServer(config util.Config, rabbitmq worker.Task, client *client.Client) {
+func runGrpcServer(config util.Config, rabbitmq worker.Task, redis *redis.Client) {
 	// create a new server
-	server, err := gapi.NewServer(config, rabbitmq, client)
+	server, err := gapi.NewServer(config, rabbitmq, redis)
 	if err != nil {
 		log.Fatal("cannot create server:", err)
 	}

@@ -9,7 +9,7 @@ INSERT INTO auctions (
   status,
   winner_id
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8
+  sqlc.arg(product_id), sqlc.arg(user_id), sqlc.arg(start_time), sqlc.arg(end_time), sqlc.arg(starting_price), sqlc.arg(current_price), sqlc.arg(status), sqlc.narg(winner_id)
 ) RETURNING *;
 
 -- name: GetAuction :one

@@ -20,37 +20,44 @@ proto-payment:
 	rm -f $(name)-service/payment/*.go
 	protoc --proto_path=proto --go_out=$(name)-service/payment --go_opt=paths=source_relative \
     --go-grpc_out=$(name)-service/payment --go-grpc_opt=paths=source_relative \
-    proto/payment-service/*.proto
+    proto/payment/*.proto
 
 proto-notification:
 	rm -f $(name)-service/notification/*.go
-	protoc --proto_path=proto --go_out=$(name)-service/notification --go_opt=paths=source_relative \
+	protoc --proto_path=proto/notification --go_out=$(name)-service/notification --go_opt=paths=source_relative \
     --go-grpc_out=$(name)-service/notification --go-grpc_opt=paths=source_relative \
-    proto/notification/notification_service.proto
+    proto/notification/*.proto
+
+proto-auction:
+	rm -f $(name)-service/auction/*.go
+	protoc --proto_path=proto/auction --go_out=$(name)-service/auction --go_opt=paths=source_relative \
+    --go-grpc_out=$(name)-service/auction --go-grpc_opt=paths=source_relative \
+    proto/auction/*.proto
+
 
 protot-product:
 	protoc --plugin=./$(service)/node_modules/.bin/protoc-gen-ts_proto \
-    --ts_proto_out=$(service)/pb \
+    --ts_proto_out=$(service)/pb/ \
     --ts_proto_opt=nestJs=true \
-    --proto_path=proto \
+    --proto_path=proto/product \
     --proto_path=/usr/local/include \
-    proto/product-service/*.proto
+    proto/product/*.proto
 
 protot-cart:
 	protoc --plugin=./$(service)/node_modules/.bin/protoc-gen-ts_proto \
 	--ts_proto_out=$(service)/pb \
 	--ts_proto_opt=nestJs=true \
-	--proto_path=proto \
+	--proto_path=proto/cart \
 	--proto_path=/usr/local/include \
-	proto/cart-service/*.proto
+	proto/cart/*.proto
 
 protot-auth:
 	protoc --plugin=./$(service)/node_modules/.bin/protoc-gen-ts_proto \
     --ts_proto_out=$(service)/pb \
     --ts_proto_opt=nestJs=true \
-    --proto_path=proto \
+    --proto_path=proto/pb \
     --proto_path=/usr/local/include \
-    proto/user-service/*.proto
+    proto/pb/*.proto
 
 rm-product:
 	rm -f $(service)/pb/$(service)/*.ts

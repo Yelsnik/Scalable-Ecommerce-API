@@ -3,19 +3,13 @@ package gapi
 import (
 	"context"
 	"encoding/json"
-	"payment-service/cart/cart-service"
-	db "payment-service/db/sqlc"
 	"payment-service/payment/payment-service"
-	"payment-service/product/product-service"
 	"payment-service/val"
 
 	"github.com/stripe/stripe-go/v81"
-	"github.com/stripe/stripe-go/v81/customer"
-	"github.com/stripe/stripe-go/v81/webhook"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (server *Server) Webhook(ctx context.Context, req *payment.WebhookRequest) (*payment.WebhookResponse, error) {
@@ -25,7 +19,7 @@ func (server *Server) Webhook(ctx context.Context, req *payment.WebhookRequest) 
 	}
 
 	webHookSecret := server.config.WebhookSigningKey
-	event, err := webhook.ConstructEvent([]byte(req.GetPayload()), req.GetStripeSignature(),
+	event, err := server.stripe.Webhook(req.GetPayload(), req.GetStripeSignature(),
 		webHookSecret)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to construct stripe event %s", err)
@@ -41,94 +35,13 @@ func (server *Server) Webhook(ctx context.Context, req *payment.WebhookRequest) 
 		return nil, status.Error(codes.Internal, "payment failed")
 	}
 
-	if event.Type == "payment_intent.succeeded" {
-		var paymentIntent *stripe.PaymentIntent
-		response, err := server.handlePaymentIfSuccesful(ctx, paymentIntent)
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "failed to create order %s", err)
-		}
-
-		return response, nil
-	}
-
-	return &payment.WebhookResponse{}, nil
-}
-
-// handle payment if successful func
-func (server *Server) handlePaymentIfSuccesful(ctx context.Context, paymentIntent *stripe.PaymentIntent) (*payment.WebhookResponse, error) {
-	// get the customer
-	params := &stripe.CustomerParams{}
-
-	customer, err := customer.Get(paymentIntent.Customer.ID, params)
+	var paymentIntent *stripe.PaymentIntent
+	response, err := server.helpers.HandlePaymentIfSuccesful(ctx, paymentIntent)
 	if err != nil {
-		return nil, err
-	}
-
-	// get user from db
-	user, err := server.client.GetUserByEmail(ctx, customer.Email)
-	if err != nil {
-		return nil, err
-	}
-
-	// create the order
-	arg := db.OrderTxParams{
-		PaymentIntent:   paymentIntent.ID,
-		UserName:        user.User.Name,
-		BuyerID:         paymentIntent.Metadata["buyerId"],
-		SellerID:        paymentIntent.Metadata["sellerId"],
-		CartItemId:      paymentIntent.Metadata["cartitemId"],
-		TotalPrice:      float64(paymentIntent.AmountReceived),
-		DeliveryAddress: paymentIntent.Metadata["deliveryAddress"],
-		Country:         paymentIntent.Metadata["country"],
-		PaymentStatus:   string(paymentIntent.Status),
-		OrderStatus:     "processing",
-		GetCartItem: func(ctx context.Context, cartItemId string) (*cart.CartItemResponse, error) {
-			response, err := server.client.GetCartItem(ctx, cartItemId)
-
-			return response, err
-		},
-		GetProductByID: func(ctx context.Context, productId string) (*product.ProductResponse, error) {
-			response, err := server.client.GetProductByID(ctx, productId)
-
-			return response, err
-		},
-		RemoveCartTx: func(ctx context.Context, cartItemId string) (*cart.RemoveCartTxResult, error) {
-			response, err := server.client.RemoveCartTx(ctx, cartItemId)
-
-			return response, err
-		},
-	}
-
-	result, err := server.store.CreateOrderTx(ctx, arg)
-	if err != nil {
-		return nil, err
-	}
-
-	// send the response
-	response := &payment.WebhookResponse{
-		Payment: &payment.Payment{
-			Id:        result.Payment.ID,
-			Amount:    float32(result.Payment.Amount),
-			Currency:  result.Payment.Currency,
-			Status:    result.Payment.Status,
-			UserId:    result.Payment.UserID.String(),
-			CreatedAt: timestamppb.New(result.Payment.CreatedAt),
-		},
-		Order: &payment.Order{
-			Id:              result.Order.ID.String(),
-			UserName:        result.Order.UserName,
-			BuyerId:         result.Order.BuyerID.String(),
-			SellerId:        result.Order.SellerID.String(),
-			TotalPrice:      float32(result.Order.TotalPrice),
-			DeliveryAddress: result.Order.DeliveryAddress,
-			Country:         result.Order.Country,
-			Status:          result.Order.Status,
-			CreatedAt:       timestamppb.New(result.Order.CreatedAt),
-		},
+		return nil, status.Errorf(codes.Internal, "failed to create order %s", err)
 	}
 
 	return response, nil
-
 }
 
 // validator func for webhook req

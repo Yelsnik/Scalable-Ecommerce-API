@@ -14,7 +14,9 @@ import (
 )
 
 func newTestServer(t *testing.T, store db.Store, client client.ClientInterface, helpers helpers.Helper, stripe stripe.Stripe) *Server {
-	config := util.Config{}
+	config := util.Config{
+		WebhookSigningKey: "whsec_1d6887b20f7014249116c00aa0ddd2fe96e379f3b568a202d9ce60bdbe09dda8",
+	}
 
 	params := NewGrpcServerParams{
 		Config:  config,

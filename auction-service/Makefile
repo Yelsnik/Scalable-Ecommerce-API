@@ -25,4 +25,7 @@ server:
 evans:
 	evans --host localhost --port 3030 -r
 
+redis:
+	docker run --name redis -p 6379:6379 -d redis
+
 .PHONY: postgres createdb dropdb migrateup migratedown new_migration sqlc server evans
