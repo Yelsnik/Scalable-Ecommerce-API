@@ -13,6 +13,8 @@ import (
 )
 
 func (server *Server) Webhook(ctx context.Context, req *payment.WebhookRequest) (*payment.WebhookResponse, error) {
+	var response *payment.WebhookResponse
+	
 	violations := validateWebhookRequest(req)
 	if violations != nil {
 		return nil, invalidArgumentError(violations)
@@ -35,10 +37,12 @@ func (server *Server) Webhook(ctx context.Context, req *payment.WebhookRequest) 
 		return nil, status.Error(codes.Internal, "payment failed")
 	}
 
-	var paymentIntent *stripe.PaymentIntent
-	response, err := server.helpers.HandlePaymentIfSuccesful(ctx, paymentIntent)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to create order %s", err)
+	if event.Type == "payment_intent.succeeded" {
+		var paymentIntent *stripe.PaymentIntent
+		response, err = server.helpers.HandlePaymentIfSuccesful(ctx, paymentIntent)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to create order %s", err)
+		}
 	}
 
 	return response, nil

@@ -34,6 +34,36 @@ func (m *MockStripe) EXPECT() *MockStripeMockRecorder {
 	return m.recorder
 }
 
+// AttachPaymentMethod mocks base method.
+func (m *MockStripe) AttachPaymentMethod(arg0 string, arg1 *stripe.PaymentMethodAttachParams) (*stripe.PaymentMethod, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AttachPaymentMethod", arg0, arg1)
+	ret0, _ := ret[0].(*stripe.PaymentMethod)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AttachPaymentMethod indicates an expected call of AttachPaymentMethod.
+func (mr *MockStripeMockRecorder) AttachPaymentMethod(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AttachPaymentMethod", reflect.TypeOf((*MockStripe)(nil).AttachPaymentMethod), arg0, arg1)
+}
+
+// NewCustomer mocks base method.
+func (m *MockStripe) NewCustomer(arg0 *stripe.CustomerParams) (*stripe.Customer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NewCustomer", arg0)
+	ret0, _ := ret[0].(*stripe.Customer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NewCustomer indicates an expected call of NewCustomer.
+func (mr *MockStripeMockRecorder) NewCustomer(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewCustomer", reflect.TypeOf((*MockStripe)(nil).NewCustomer), arg0)
+}
+
 // NewPaymentIntent mocks base method.
 func (m *MockStripe) NewPaymentIntent(arg0 *stripe.PaymentIntentParams) (*stripe.PaymentIntent, error) {
 	m.ctrl.T.Helper()

@@ -30,7 +30,7 @@ server:
 	go run main.go
 
 evans:
-	evans --host localhost --port 9090 -r
+	evans --host localhost --port 6060 -r
 
 proto:
 	rm -f payment/*.go
